@@ -343,3 +343,18 @@ html[dir="rtl"] .chip{font-family:var(--urdu)}
 .lrow:last-child{border-bottom:0}
 .lhead{display:flex;justify-content:space-between;gap:8px}
 .lrow.done .lhead b{color:var(--green)}
+
+/* ---- journal & ramadan ---- */
+.jtype{display:inline-flex;align-items:center;gap:4px}
+.jtype input{accent-color:var(--green)}
+.jday{display:flex;flex-direction:column;gap:8px;padding-top:6px}
+.jentry{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.jtext{white-space:normal;overflow-wrap:anywhere;line-height:1.6}
+.danger-link{color:var(--bad)}
+input[type=search]{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}
+.ramadan{border-color:var(--gold);background:linear-gradient(160deg,var(--gold-soft),var(--card) 60%)}
+.ramgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seg button.on.yes{background:var(--green);color:var(--card)}
+.seg button.on.no{background:var(--bad);color:var(--card)}
+.seg button.on.excused{background:var(--rose);color:var(--card)}
+html[dir="rtl"] .card h2 .ar,html[dir="rtl"] .pref summary .ar{display:none}
