@@ -52,7 +52,7 @@ nav button:hover{color:var(--green)}
 nav button[aria-selected="true"]{background:var(--green);color:var(--card);box-shadow:0 4px 12px -4px color-mix(in srgb,var(--green) 70%,transparent)}
 button{font-family:var(--body)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-#view{animation:fadeUp .45s ease both}
+#view{animation:fadeUp .45s ease}
 @keyframes fadeUp{from{opacity:.001;transform:translateY(8px)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
 .card h2{margin:0;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:8px;text-wrap:balance}
@@ -358,3 +358,16 @@ input[type=search]{font:inherit;color:var(--ink);background:var(--bg);border:1px
 .seg button.on.no{background:var(--bad);color:var(--card)}
 .seg button.on.excused{background:var(--rose);color:var(--card)}
 html[dir="rtl"] .card h2 .ar,html[dir="rtl"] .pref summary .ar{display:none}
+
+/* ---- prayer times & azkar ---- */
+.ptgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pt{background:var(--bg);border-radius:12px;padding:8px;text-align:center;display:flex;flex-direction:column;gap:2px;font-size:.8rem;color:var(--muted)}
+.pt b{color:var(--ink);font-size:.95rem;font-variant-numeric:tabular-nums}
+.pt.next{background:var(--green);color:var(--gold-soft)}
+.pt.next b{color:#fff}
+.azsets{display:flex;flex-wrap:wrap;gap:6px}
+.azset{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 .85rem var(--body);cursor:pointer}
+html[dir="rtl"] .azset{font-family:var(--urdu)}
+.azset.done{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.aztext{font-family:var(--display);font-size:1.35rem;line-height:2.1;text-align:right}
+.azitem.done{border-color:var(--green);background:var(--green-soft)}

@@ -90,7 +90,7 @@ function status(k){const d=peek(k);if(d&&d.period)return"period";if(fullOK(d))re
   if(d&&(prayed(d)||d.tarjuma||d.tajweed))return"partial";return k<TODAY()?"missed":"none"}
 function points(d){if(!d)return 0;let p=0;
   PRAYERS.forEach(([x])=>{if(d.prayers[x]==="ontime")p+=10;else if(d.prayers[x]==="qaza")p+=5});
-  p+=(d.ramadan&&d.ramadan.fast==="yes"?20:0)+(d.ramadan&&d.ramadan.taraweeh?10:0)+ACTS.filter(([a])=>qDone(d,a)).length*20+Object.keys(d.rev||{}).length*10+learnGoalsMet(d)*10;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
+  p+=Object.values(d.azkar||{}).filter(Boolean).length*10+(d.ramadan&&d.ramadan.fast==="yes"?20:0)+(d.ramadan&&d.ramadan.taraweeh?10:0)+ACTS.filter(([a])=>qDone(d,a)).length*20+Object.keys(d.rev||{}).length*10+learnGoalsMet(d)*10;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
 function earliest(){const ks=Object.keys(S.days).sort();return ks[0]||TODAY()}
 function streak(pred){const first=earliest();let k=TODAY(),n=0;const t=peek(k);if(!(t&&t.period)&&!pred(t))k=key(add(parse(k),-1));
   while(k>=first){const d=peek(k);if(d&&d.period){}else if(pred(d))n++;else break;k=key(add(parse(k),-1))}return n}
@@ -148,7 +148,7 @@ function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},not
   let chips="";for(let i=BACKFILL;i>=0;i--){const k=key(add(new Date(),-i)),x=parse(k);
     chips+=`<button class="day" data-day="${k}" aria-pressed="${k===sel}">${i===0?t.today:i===1?t.yday:x.toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"short"})}<b>${x.getDate()}</b><span class="dot ${status(k)}"></span></button>`}
   const g=G();
-  return`${sel===TODAY()?reminderCard():""}${streakRow()}
+  return`${sel===TODAY()?reminderCard()+timesCard():""}${streakRow()}
   <div class="card"><div class="days">${chips}</div>
     <div class="datehead"><b>${gFmt.format(dd)}</b><div class="hijri">${hijri(dd)}</div></div>
     <div class="muted">${can?t.backfill(BACKFILL):t.locked(BACKFILL)}</div></div>
@@ -161,7 +161,7 @@ function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},not
   ${ACTS.some(([a])=>g[a].on)?"":`<div class="card empty"><b>${t.noQuranGoal}</b><button class="btn primary" data-goto="profile">${t.setGoals}</button></div>`}
   ${revCard(sel,dis)}`}
   ${learnCard(d,dis)}
-  ${g.dhikr.on?dhikrCard(d,dis):""}
+  ${g.dhikr.on?azkarCard(d,dis)+dhikrCard(d,dis):""}
   <div class="card"><h2>${t.routine}<small><a href="#tasks" data-goto="tasks" style="color:var(--green)">${t.edit}</a></small></h2>
     ${S.routine.length?S.routine.map(r=>`<div class="check${d.tasks&&d.tasks[r.id]?" done":""}"><input type="checkbox" id="r_${r.id}" data-rt="${r.id}" ${d.tasks&&d.tasks[r.id]?"checked":""}${dis}><label for="r_${r.id}">${esc(r.name)}</label></div>`).join(""):`<div class="muted">${t.noRoutine}</div>`}</div>
   <div class="card"><h2>${t.note}</h2><textarea id="note" style="min-height:70px;font-family:var(--body);font-size:.9rem" placeholder="${t.notePh}"${dis}>${esc(d.note||"")}</textarea>
@@ -293,6 +293,7 @@ function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div
       <label for="pPw">${t.newPw}</label><input type="password" id="pPw" autocomplete="new-password" minlength="8" required>
       <label for="pPw2">${t.confirmPw}</label><input type="password" id="pPw2" autocomplete="new-password" minlength="8" required>
       <div class="err" id="pErr" role="alert"></div><button class="btn">${t.changePw}</button></form></div>`:""}
+  ${prayerSettingsCard()}
   ${goalsCard()}
   <div class="card"><div class="field"><label for="ramMode">${t.ramadanMode}</label><select id="ramMode">${["auto","on","off"].map(v=>`<option value="${v}"${(S.ramadanMode||"auto")===v?" selected":""}>${t.ramModes[v]}</option>`).join("")}</select></div><div class="muted small">${t.ramModeHelp}</div></div>
   <div class="card"><div class="row"><button class="btn" id="tourAgain">${t.tourAgain}</button><button class="btn" id="logout2">${t.logout}</button></div></div>
@@ -361,6 +362,7 @@ async function doAuth(form){const t=T(),name=document.getElementById("aName").va
   if(!found||found.pin!==await hashPin(name,pin))return err.textContent=t.wrong;
   loadAccount(found.id);tab="today";sel=TODAY();toast(t.welcome(found.name));render()}
 function logout(){if(sb){Cloud.push(S).finally(()=>sb.auth.signOut());Cloud.user=null;me=null;S.days={};authMode="in";return render()}save();ls.del(SES);me=null;authMode="in";render()}
+let lastView="";
 function render(){const t=T(),hr=new Date().getHours();
   document.documentElement.lang={en:"en",ur:"ur",roman:"ur-Latn"}[S.lang]||"en";document.documentElement.dir=t.dir||"ltr";
   document.getElementById("logout").hidden=!me;document.getElementById("logout").title=t.logout;document.getElementById("logout").setAttribute("aria-label",t.logout);
@@ -377,14 +379,16 @@ function render(){const t=T(),hr=new Date().getHours();
   document.getElementById("tabs").innerHTML=TABS.map((id,i)=>`<button data-tab="${id}" role="tab" aria-selected="${id===tab}">${t.tabs[i]}</button>`).join("");
   const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const gl=G(),on=ACTS.filter(([a])=>gl[a].on);const g=prayed(td)+on.filter(([a])=>qDone(td,a)).length+learnGoalsMet(td)+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(5+on.length+learnGoalsCount()+S.routine.length)*100)}
   document.getElementById("ringVal").style.strokeDashoffset=226.2*(1-pct/100);document.getElementById("ringPct").textContent=pct+"%";
-  const v=document.getElementById("view");v.style.animation="none";void v.offsetWidth;v.style.animation="";
+  const v=document.getElementById("view"),vk=tab+"|"+(azOpen||"");if(vk!==lastView){lastView=vk;v.style.animation="none";void v.offsetWidth;v.style.animation=""}
   if(!S.onboarded){v.innerHTML=`<div class="card welcome"><div class="authicon">🌿</div><h2 style="justify-content:center">${t.welcomeTitle}</h2><div class="muted" style="text-align:center">${t.welcomeSub}</div></div>`+goalsCard(true);return}
   if(!S.toured)setTimeout(startTour,300);
+  schedulePrayerReminder();
+  if(tab==="today"&&azOpen&&AZKAR[azOpen]){v.innerHTML=azkarView();return}
   v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile}[tab]()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");
-document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;render();scrollTo(0,0)}};
+document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;azOpen=null;render();scrollTo(0,0)}};
 document.querySelector(".lang").onclick=e=>{const b=e.target.closest("[data-lang]");if(b){S.lang=b.dataset.lang;save();ls.set("deen-diary-lang",S.lang);render()}};
 {const lg=ls.get("deen-diary-lang");if(!me&&lg)S.lang=lg}
 document.getElementById("logout").onclick=logout;
@@ -404,6 +408,12 @@ view.addEventListener("click",e=>{
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
+  if(t.dataset.azopen){azOpen=t.dataset.azopen;render();scrollTo(0,0);return}
+  if(t.id==="azBack"){azOpen=null;return render()}
+  if(t.dataset.aztap){azTap(+t.dataset.aztap);return commit()}
+  if(t.id==="ptGeo"){const msg=document.getElementById("ptGeoMsg"),tr=T();if(!navigator.geolocation){msg.textContent=tr.ptGeoNo;return}
+    msg.textContent="…";navigator.geolocation.getCurrentPosition(pos=>{const p=PS();p.lat=+pos.coords.latitude.toFixed(4);p.lng=+pos.coords.longitude.toFixed(4);p.city="";commit();toast(tr.saved)},
+      ()=>{msg.textContent=tr.ptGeoNo},{timeout:15000,maximumAge:3600000});return}
   if(t.dataset.ram){const[f,v]=t.dataset.ram.split("|"),d=dayOf(sel);d.ramadan=d.ramadan||{};d.ramadan[f]=d.ramadan[f]===v?"":v;return commit()}
   if(t.dataset.jedit){jEdit=t.dataset.jedit;render();scrollTo(0,0);return}
   if(t.dataset.jdel){if(!t.dataset.armed){t.dataset.armed="1";t.textContent=T().sure;return}S.journal=(S.journal||[]).filter(x=>x.id!==t.dataset.jdel);if(jEdit===t.dataset.jdel)jEdit=null;return commit()}
@@ -430,6 +440,13 @@ view.addEventListener("change",e=>{const t=e.target;
   if(t.dataset.ramck){const d=dayOf(sel);d.ramadan=d.ramadan||{};d.ramadan[t.dataset.ramck]=t.checked;return commit()}
   if(t.dataset.ramtxt){const d=dayOf(sel);d.ramadan=d.ramadan||{};d.ramadan[t.dataset.ramtxt]=t.value.trim().slice(0,80);save();return}
   if(t.id==="ramMode"){S.ramadanMode=t.value;return commit()}
+  if(t.id==="ptCity"){const c=PT_CITIES.find(x=>x[0]===t.value);if(c){const p=PS();p.city=c[0];p.lat=c[1];p.lng=c[2]}return commit()}
+  if(t.id==="ptMethod"){PS().method=t.value;return commit()}
+  if(t.id==="ptAsr"){PS().asr=+t.value;return commit()}
+  if(t.id==="ptNotify"){const p=PS(),tr=T(),msg=document.getElementById("ptNotifyMsg");
+    if(!t.checked){p.notify=false;return commit()}
+    if(!("Notification"in window)){t.checked=false;msg.textContent=tr.ptNotifNo;return}
+    Notification.requestPermission().then(r=>{if(r==="granted"){p.notify=true;commit()}else{t.checked=false;msg.textContent=tr.ptNotifDenied}});return}
   if(t.id==="jFilter"){jFilter=t.value;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}
   if(t.id==="note"){dayOf(sel).note=t.value;save()}});
