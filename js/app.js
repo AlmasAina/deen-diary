@@ -96,7 +96,7 @@ function streak(pred){const first=earliest();let k=TODAY(),n=0;const t=peek(k);i
   while(k>=first){const d=peek(k);if(d&&d.period){}else if(pred(d))n++;else break;k=key(add(parse(k),-1))}return n}
 const completeDays=()=>Object.keys(S.days).filter(k=>!S.days[k].period&&fullOK(S.days[k])).sort();
 const flowerBonus=()=>Object.entries(S.flowers).reduce((a,[k,f])=>a+(S.days[k]&&fullOK(S.days[k])&&SPMAP[f.sp]?RARITY[SPMAP[f.sp].r].bonus:0),0);
-const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
+const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus()+quizPoints();
 
 /* ---- quran positions ---- */
 /* ---- rewards ---- */
@@ -148,7 +148,7 @@ function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},not
   let chips="";for(let i=BACKFILL;i>=0;i--){const k=key(add(new Date(),-i)),x=parse(k);
     chips+=`<button class="day" data-day="${k}" aria-pressed="${k===sel}">${i===0?t.today:i===1?t.yday:x.toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"short"})}<b>${x.getDate()}</b><span class="dot ${status(k)}"></span></button>`}
   const g=G();
-  return`${sel===TODAY()?reminderCard()+timesCard():""}${streakRow()}
+  return`${sel===TODAY()?reminderCard()+timesCard()+dailyCard():""}${streakRow()}
   <div class="card"><div class="days">${chips}</div>
     <div class="datehead"><b>${gFmt.format(dd)}</b><div class="hijri">${hijri(dd)}</div></div>
     <div class="muted">${can?t.backfill(BACKFILL):t.locked(BACKFILL)}</div></div>
@@ -384,11 +384,11 @@ function render(){const t=T(),hr=new Date().getHours();
   if(!S.toured)setTimeout(startTour,300);
   schedulePrayerReminder();
   if(tab==="today"&&azOpen&&AZKAR[azOpen]){v.innerHTML=azkarView();return}
-  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile}[tab]()}
+  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz}[tab]()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");
-document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;azOpen=null;render();scrollTo(0,0)}};
+document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;azOpen=null;qz.mode="home";render();scrollTo(0,0)}};
 document.querySelector(".lang").onclick=e=>{const b=e.target.closest("[data-lang]");if(b){S.lang=b.dataset.lang;save();ls.set("deen-diary-lang",S.lang);render()}};
 {const lg=ls.get("deen-diary-lang");if(!me&&lg)S.lang=lg}
 document.getElementById("logout").onclick=logout;
@@ -408,6 +408,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
+  if(quizClick(t))return commit();
   if(t.dataset.azopen){azOpen=t.dataset.azopen;render();scrollTo(0,0);return}
   if(t.id==="azBack"){azOpen=null;return render()}
   if(t.dataset.aztap){azTap(+t.dataset.aztap);return commit()}
@@ -448,6 +449,8 @@ view.addEventListener("change",e=>{const t=e.target;
     if(!("Notification"in window)){t.checked=false;msg.textContent=tr.ptNotifNo;return}
     Notification.requestPermission().then(r=>{if(r==="granted"){p.notify=true;commit()}else{t.checked=false;msg.textContent=tr.ptNotifDenied}});return}
   if(t.id==="jFilter"){jFilter=t.value;return render()}
+  if(t.id==="qhCat"){qz.filter.cat=t.value;return render()}
+  if(t.id==="qhRes"){qz.filter.res=t.value;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}
   if(t.id==="note"){dayOf(sel).note=t.value;save()}});
 view.addEventListener("keydown",e=>{const b=e.target.closest&&e.target.closest("[data-bud]");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openBud(b.dataset.bud)}});

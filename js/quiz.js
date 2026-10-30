@@ -1,0 +1,117 @@
+/* Knowledge Journey: question bank, two-day challenges, daily question and "My Questions" history.
+   Quran questions are generated from Tanzil metadata (so every answer is checked against the data); others come from quiz-data.js.
+   Loaded before app.js; uses its globals only when called. */
+function seedRand(str){let h=2166136261;for(const c of str)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h=Math.imul(h^(h>>>15),2246822507);h=Math.imul(h^(h>>>13),3266489909);return((h^=h>>>16)>>>0)/4294967296}}
+function shuffled(arr,seed){const a=arr.slice(),r=seedRand(seed);for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+/* pick 3 distinct wrong values from candidates, deterministic per question */
+function wrongs(correct,cands,seed){return shuffled([...new Set(cands.filter(x=>x!==correct))],seed).slice(0,3)}
+const nearNums=(n,lo,hi,spread)=>{const out=[];for(let d=1;d<=spread;d++){if(n-d>=lo)out.push(n-d);if(n+d<=hi)out.push(n+d)}return out};
+
+let _bank=null;
+function quizBank(){if(_bank)return _bank;const B=[],S_=i=>SURAH[i-1];
+  const gen=(id,kind,args,ans,opts,ref)=>B.push({id,cat:"quran",src:"meta",kind,args,ans:String(ans),opts:shuffled([ans,...opts].map(String),id),ref});
+  for(let s=1;s<=114;s++){const n=AYAT[s-1],rk=RUKU_STARTS[s-1].length,jz=Q_SURAH_JUZ[s-1];
+    gen("ayat-"+s,"ayat",[S_(s)],n,wrongs(n,nearNums(n,3,286,6),"ay"+s),"Tanzil");
+    gen("num-"+s,"num",[S_(s)],s,wrongs(s,nearNums(s,1,114,4),"nu"+s),"Tanzil");
+    gen("juz-"+s,"juz",[S_(s)],jz,wrongs(jz,nearNums(jz,1,30,3),"jz"+s),"Tanzil");
+    gen("ruku-"+s,"ruku",[S_(s)],rk,wrongs(rk,nearNums(rk,1,40,4),"rk"+s),"Tanzil");
+    const mad=Q_REV[s-1]==="d",other=[];for(let x=1;x<=114;x++)if(Q_REV[x-1]!==Q_REV[s-1])other.push(S_(x));
+    gen("rev-"+s,mad?"madani":"makki",[],S_(s),wrongs(S_(s),other,"rv"+s),"Tanzil");
+    const diff=[];for(let x=1;x<=114;x++)if(AYAT[x-1]!==n)diff.push(S_(x));
+    gen("has-"+s,"has",[n],S_(s),wrongs(S_(s),diff,"hs"+s),"Tanzil");
+    if(s<114)gen("next-"+s,"next",[S_(s)],S_(s+1),wrongs(S_(s+1),[s-1,s-2,s-3,s+2,s+3,s+4].filter(x=>x>=1&&x<=114&&x!==s&&x!==s+1).map(S_),"nx"+s),"Tanzil");
+    if(rk>=2){const a2=RUKU_STARTS[s-1][1];gen("r2-"+s,"ruku2",[S_(s)],a2,wrongs(a2,nearNums(a2,2,AYAT[s-1],5),"r2"+s),"Tanzil")}
+    if(rk>=3){const a3=RUKU_STARTS[s-1][2];gen("r3-"+s,"ruku3",[S_(s)],a3,wrongs(a3,nearNums(a3,2,AYAT[s-1],5),"r3"+s),"Tanzil")}}
+  Q_SAJDAS.forEach(([c,v],i)=>{const pool=Q_SAJDAS.filter(([c2,v2])=>c2!==c&&v2!==v).map(([c2])=>S_(c2));gen("saj-"+(i+1),"sajda",[v],S_(c),wrongs(S_(c),pool,"sj"+i),"Tanzil")});
+  Q_JUZ_START.forEach(([c,v],i)=>{gen("jst-"+(i+1),"juzstart",[i+1],S_(c),wrongs(S_(c),[c-1,c+1,c+2,c-2,c+3].filter(x=>x>=1&&x<=114&&x!==c).map(S_),"js"+i),"Tanzil")});
+  QUIZ_CURATED.forEach(q=>B.push({id:q.id,cat:q.cat,src:q.src,cur:q,ans:"0",opts:shuffled(["0","1","2","3"],q.id),ref:q.ref}));
+  _bank=B;return B}
+const qById=id=>quizBank().find(q=>q.id===id);
+/* text of a question, its options and explanation in the current language */
+function qText(q){const t=T();if(q.cur)return q.cur.q[S.lang]||q.cur.q.en;return t.qz[q.kind](...q.args)}
+function qOpt(q,o){if(q.cur){const x=q.cur.o[+o];return S.lang==="ur"?x[1]:x[0]}return o}
+function qExpl(q){const t=T();if(q.cur)return q.cur.e[S.lang]||q.cur.e.en;return t.qzExpl(q.kind,q.args,q.ans)}
+function catOf(q){return q.cat}
+
+/* ---- state ---- */
+const QZ=()=>S.quiz||(S.quiz={att:{},ch:{},daily:{}});
+const CH_SIZE=5;
+function catQuestions(cat){return shuffled(quizBank().filter(q=>q.cat===cat).map(q=>q.id),"cat-"+cat)}
+function chState(cat){const c=QZ().ch[cat]||(QZ().ch[cat]={level:0,d1:"",d2:""});return c}
+function chIds(cat,level,day){const ids=catQuestions(cat),start=level*CH_SIZE*2+(day-1)*CH_SIZE;return ids.slice(start,start+CH_SIZE)}
+const levelsIn=cat=>Math.floor(catQuestions(cat).length/(CH_SIZE*2));
+function answer(qid,o,ctx){const z=QZ(),q=qById(qid),ok=o===q.ans,prev=z.att[qid];
+  if(prev&&!ctx.retry)return prev;
+  if(prev&&ctx.retry){prev.retrySel=o;prev.retryOk=ok;prev.retryPts=ok&&!prev.ok&&!prev.retryPts?3:0;prev.retryDate=TODAY();return prev}
+  return z.att[qid]={sel:o,ok,date:TODAY(),pts:ok?10:0,cat:q.cat,via:ctx.via||""}}
+function quizPoints(){const z=QZ();let p=0;Object.values(z.att).forEach(a=>p+=(a.pts||0)+(a.retryPts||0));Object.values(z.ch).forEach(c=>p+=(c.done||0)*20);return p}
+function dailyQid(){const z=QZ(),k=TODAY();if(z.daily[k])return z.daily[k];
+  const pool=quizBank().filter(q=>!z.att[q.id]);if(!pool.length)return null;const r=seedRand("daily"+k)();return z.daily[k]=pool[Math.floor(r*pool.length)].id}
+
+/* ---- views ---- */
+let qz={mode:"home",cat:null,day:1,show:null,filter:{cat:"all",res:"all"},retry:null};
+function optionsHtml(q,att,via){const t=T();
+  return`<div class="qopts">${q.opts.map((o,i)=>{let cls="";if(att){if(o===q.ans)cls=" right";else if(o===att.sel)cls=" wrong"}
+    return`<button class="qopt${cls}" data-qans="${q.id}|${esc(o)}|${via}"${att?" disabled":""}><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</button>`}).join("")}</div>`}
+function feedbackHtml(q,att){const t=T();if(!att)return"";
+  return`<div class="qfeed ${att.ok?"ok":"no"}"><b>${att.ok?t.qzRight(att.pts):t.qzWrong(esc(qOpt(q,q.ans)))}</b><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}${q.src==="quran"?" · "+t.qzSrc.quran:q.src==="seerah"?" · "+t.qzSrc.seerah:""}</div></div>`}
+function questionCard(qid,via,head){const q=qById(qid),att=QZ().att[qid];
+  return`<div class="card qcard">${head||""}<div class="qtext">${esc(qText(q))}</div>${optionsHtml(q,att,via)}${feedbackHtml(q,att)}</div>`}
+function dailyCard(){const t=T(),id=dailyQid();if(!id)return"";
+  return questionCard(id,"daily",`<h2><span>${t.qzDaily}<span class="ar">سوال</span></span><button class="linkbtn" data-goto="quiz">${t.qzJourney} ›</button></h2>`)}
+
+function vQuiz(){const t=T(),z=QZ();
+  if(qz.mode==="play")return vChallenge();
+  if(qz.mode==="history")return vHistory();
+  const total=quizBank().length,tried=Object.keys(z.att).length,right=Object.values(z.att).filter(a=>a.ok).length;
+  return`<div class="card"><h2><span>${t.qzJourney}<span class="ar">علم کا سفر</span></span><small>${t.qzCount(total)}</small></h2>
+    <div class="garden-stats"><div><b>${tried}</b><span>${t.qzTried}</span></div><div><b>${tried?Math.round(right/tried*100):0}%</b><span>${t.qzCorrectPct}</span></div><div><b>${quizPoints()}</b><span>${t.pts}</span></div></div>
+    <div class="muted small">${t.qzHow}</div>
+    <button class="btn" data-qzmode="history">📜 ${t.qzMine}</button></div>
+  ${QUIZ_CATS.map(cat=>{const c=chState(cat),lv=levelsIn(cat),today=TODAY(),fin=c.level>=lv;
+    const d2Ready=c.d1&&c.d1<today,status=fin?t.qzAllDone:c.d1?(d2Ready?t.qzDay2Ready:t.qzDay2Tomorrow):t.qzDay1Ready;
+    return`<div class="card qcat"><div class="lhead"><b>${t.qzCats[cat]}</b><span class="muted">${t.qzLevel(Math.min(c.level+1,lv),lv)}</span></div>
+      <div class="nextgoal"><i style="width:${lv?c.level/lv*100:0}%"></i></div>
+      <div class="row" style="justify-content:space-between"><span class="muted small">${status}</span>
+      ${fin?"":`<button class="btn small primary" data-qzplay="${cat}"${c.d1&&!d2Ready?" disabled":""}>${c.d1?t.qzStartDay(2):t.qzStartDay(1)}</button>`}</div></div>`}).join("")}`}
+
+function vChallenge(){const t=T(),c=chState(qz.cat),ids=chIds(qz.cat,c.level,qz.day),z=QZ();
+  const answered=ids.filter(id=>z.att[id]),cur=qz.show||ids.find(id=>!z.att[id]);
+  const head=`<div class="row" style="justify-content:space-between"><button class="btn small" data-qzmode="home">‹ ${t.back}</button><span class="muted">${t.qzCats[qz.cat]} · ${t.qzLevel(c.level+1,levelsIn(qz.cat))} · ${t.qzDayN(qz.day)}</span></div>`;
+  if(cur){const i=ids.indexOf(cur);
+    return`<div class="card">${head}<div class="pips">${ids.map(id=>`<span class="pip${z.att[id]?(z.att[id].ok?" on":" bad"):""}"></span>`).join("")}</div></div>
+      ${questionCard(cur,"ch",`<div class="muted">${t.qzQn(i+1,ids.length)}</div>`)}
+      ${z.att[cur]?`<button class="btn primary" data-qznext="1">${i<ids.length-1?t.next:t.qzSeeResult}</button>`:""}`}
+  /* all five answered: finish the day */
+  const right=answered.filter(id=>z.att[id].ok).length;
+  const both=qz.day===2?[...chIds(qz.cat,c.level,1),...ids]:ids,bothRight=both.filter(id=>z.att[id]&&z.att[id].ok).length;
+  return`<div class="card">${head}<h2>${qz.day===2?t.qzFinal:t.qzDayDone}</h2>
+    <div class="garden-stats"><div><b>${qz.day===2?bothRight:right}/${both.length}</b><span>${t.qzCorrect}</span></div><div><b>${both.filter(id=>z.att[id]&&!z.att[id].ok).length}</b><span>${t.qzIncorrect}</span></div><div><b>${both.reduce((a,id)=>a+(z.att[id]?z.att[id].pts:0),0)+(qz.day===2?20:0)}</b><span>${t.pts}</span></div></div>
+    <div class="muted">${qz.day===1?t.qzComeBack:t.qzUnlocked}</div>
+    <button class="btn primary" data-qzfinish="1">${t.finish}</button></div>
+  ${both.map(id=>{const q=qById(id),a=z.att[id];return`<div class="card qhist ${a&&a.ok?"ok":"no"}"><div class="qtext small">${esc(qText(q))}</div>${feedbackHtml(q,a)}</div>`}).join("")}`}
+function finishDay(){const c=chState(qz.cat);if(qz.day===1)c.d1=TODAY();else{c.d2=TODAY();c.level++;c.done=(c.done||0)+1;c.d1="";c.d2=""}qz.mode="home"}
+
+function vHistory(){const t=T(),z=QZ(),f=qz.filter;
+  const rows=Object.entries(z.att).filter(([id,a])=>(f.cat==="all"||a.cat===f.cat)&&(f.res==="all"||(f.res==="ok")===a.ok)).sort((a,b)=>b[1].date.localeCompare(a[1].date));
+  return`<div class="card"><div class="row" style="justify-content:space-between"><button class="btn small" data-qzmode="home">‹ ${t.back}</button><b>${t.qzMine}</b></div>
+    <div class="row"><select id="qhCat" aria-label="${t.qzCategory}"><option value="all">${t.all}</option>${QUIZ_CATS.map(c=>`<option value="${c}"${f.cat===c?" selected":""}>${t.qzCats[c]}</option>`).join("")}</select>
+    <select id="qhRes" aria-label="${t.qzResult}"><option value="all">${t.all}</option><option value="ok"${f.res==="ok"?" selected":""}>${t.qzCorrect}</option><option value="no"${f.res==="no"?" selected":""}>${t.qzIncorrect}</option></select></div>
+    <div class="muted small">${t.qzMineHelp}</div></div>
+  ${rows.length?rows.map(([id,a])=>{const q=qById(id);if(!q)return"";const retrying=qz.retry===id;
+    return`<div class="card qhist ${a.ok?"ok":"no"}"><div class="muted small">${t.qzCats[a.cat]} · ${a.date} · ${t.qzPtsEarned((a.pts||0)+(a.retryPts||0))}</div>
+      <div class="qtext">${esc(qText(q))}</div>
+      ${retrying?optionsHtml(q,a.retrySel!==undefined&&a.retryDate===TODAY()&&qz.retryDone?{sel:a.retrySel}:null,"retry"):`<div class="qopts">${q.opts.map((o,i)=>`<div class="qopt static${o===q.ans?" right":o===a.sel?" wrong":""}"><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</div>`).join("")}</div>`}
+      ${retrying&&!qz.retryDone?"":`<div class="muted small">${t.qzYour}: <b>${esc(qOpt(q,a.sel))}</b> ${a.ok?"✓":"✗"} · ${t.qzAnswer}: <b>${esc(qOpt(q,q.ans))}</b></div><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}</div>`}
+      ${!a.ok&&!a.retryOk&&!retrying?`<button class="btn small" data-qzretry="${id}">${t.qzRetry}</button>`:""}
+      ${a.retryOk?`<div class="muted small">✓ ${t.qzRetried}</div>`:""}</div>`}).join(""):`<div class="card muted">${t.qzNone}</div>`}`}
+
+/* click handler (from app.js); returns true when handled */
+function quizClick(el){const ds=el.dataset;
+  if(ds.qans){const[id,o,via]=ds.qans.split("|");if(via==="retry"){const a=answer(id,o,{retry:true});qz.retry=null;toast(a.retryOk?T().qzRight(a.retryPts||0):T().qzWrong(qOpt(qById(id),qById(id).ans)))}else{answer(id,o,{via});if(via==="ch")qz.show=id}return true}
+  if(ds.qzmode){qz.mode=ds.qzmode;qz.show=null;qz.retry=null;return true}
+  if(ds.qzplay){qz.mode="play";qz.cat=ds.qzplay;qz.day=chState(ds.qzplay).d1?2:1;qz.show=null;return true}
+  if(ds.qznext){qz.show=null;return true}
+  if(ds.qzfinish){finishDay();return true}
+  if(ds.qzretry){qz.retry=ds.qzretry;qz.retryDone=false;return true}
+  return false}

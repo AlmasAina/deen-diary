@@ -371,3 +371,23 @@ html[dir="rtl"] .azset{font-family:var(--urdu)}
 .azset.done{background:var(--green-soft);border-color:var(--green);color:var(--green)}
 .aztext{font-family:var(--display);font-size:1.35rem;line-height:2.1;text-align:right}
 .azitem.done{border-color:var(--green);background:var(--green-soft)}
+
+/* ---- knowledge journey ---- */
+.qtext{font-size:1.05rem;font-weight:600;line-height:1.5}
+.qtext.small{font-size:.92rem}
+.qopts{display:flex;flex-direction:column;gap:6px}
+.qopt{display:flex;align-items:center;gap:10px;text-align:start;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font:500 .95rem var(--body);cursor:pointer}
+html[dir="rtl"] .qopt{font-family:var(--urdu)}
+.qopt span{flex:0 0 26px;height:26px;border-radius:50%;display:grid;place-content:center;background:var(--card);border:1px solid var(--line);font-size:.78rem;font-weight:700}
+.qopt:not([disabled]):hover{border-color:var(--green)}
+.qopt.right{border-color:var(--green);background:var(--green-soft)}
+.qopt.right span{background:var(--green);color:var(--card);border-color:var(--green)}
+.qopt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.qopt.wrong span{background:var(--bad);color:var(--card);border-color:var(--bad)}
+.qopt[disabled]{cursor:default}
+.qopt.static{cursor:default}
+.qfeed{border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;animation:fadeUp .3s ease}
+.qfeed.ok{background:var(--green-soft)}.qfeed.no{background:var(--bad-soft)}
+.qfeed.ok b{color:var(--green)}.qfeed.no b{color:var(--bad)}
+.qhist.ok{border-inline-start:4px solid var(--green)}.qhist.no{border-inline-start:4px solid var(--bad)}
+.pip.bad{background:var(--bad)}
