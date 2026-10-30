@@ -1,0 +1,20 @@
+{
+  "name": "deen-diary",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deen Diary: Islamic calendar, prayer, Quran and habit tracker",
+  "scripts": {
+    "build:www": "node scripts/build-www.mjs",
+    "android": "npm run build:www && npx cap sync android",
+    "ios": "npm run build:www && npx cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "3.0.5",
+    "@capacitor/cli": "8.5.3"
+  }
+}

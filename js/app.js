@@ -322,7 +322,8 @@ function vAuthEmail(){const t=T(),m=authMode;
   return`<div class="card auth"><div class="authicon">🌸</div><h2 style="justify-content:center">${title}</h2>${body}</div>`}
 async function doAuthEmail(form){const t=T(),v=id=>{const e=document.getElementById(id);return e?e.value.trim():""},err=document.getElementById("aErr"),btn=document.querySelector("#"+form+" .btn.primary");
   const fail=msg=>{err.textContent=msg;btn.disabled=false};btn.disabled=true;err.textContent="";
-  const redirect=location.origin+location.pathname;
+  /* inside the Android/iOS app the page runs on localhost, so email links must open the website */
+  const redirect=/^https:$/.test(location.protocol)&&location.hostname!=="localhost"?location.origin+location.pathname:"https://almasaina.github.io/deen-diary/";
   try{
     if(form==="auth-up"){const pw=document.getElementById("aPw").value,g=(document.querySelector("input[name=gender]:checked")||{}).value;
       if(!v("aFull"))return fail(t.nameBad);if(!g)return fail(t.genderBad);const w=pwIssue(pw,t);if(w)return fail(w);

@@ -1,0 +1,10 @@
+{
+  "appId": "com.deendiary.app",
+  "appName": "Deen Diary",
+  "webDir": "www",
+  "android": { "backgroundColor": "#0f4535" },
+  "ios": { "backgroundColor": "#0f4535" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 1200, "backgroundColor": "#0f4535" }
+  }
+}
