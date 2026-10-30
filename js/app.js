@@ -1,7 +1,10 @@
 const SURAH="Al-Fatihah,Al-Baqarah,Aal-e-Imran,An-Nisa,Al-Ma'idah,Al-An'am,Al-A'raf,Al-Anfal,At-Tawbah,Yunus,Hud,Yusuf,Ar-Ra'd,Ibrahim,Al-Hijr,An-Nahl,Al-Isra,Al-Kahf,Maryam,Ta-Ha,Al-Anbiya,Al-Hajj,Al-Mu'minun,An-Nur,Al-Furqan,Ash-Shu'ara,An-Naml,Al-Qasas,Al-Ankabut,Ar-Rum,Luqman,As-Sajdah,Al-Ahzab,Saba,Fatir,Ya-Sin,As-Saffat,Sad,Az-Zumar,Ghafir,Fussilat,Ash-Shura,Az-Zukhruf,Ad-Dukhan,Al-Jathiyah,Al-Ahqaf,Muhammad,Al-Fath,Al-Hujurat,Qaf,Adh-Dhariyat,At-Tur,An-Najm,Al-Qamar,Ar-Rahman,Al-Waqi'ah,Al-Hadid,Al-Mujadilah,Al-Hashr,Al-Mumtahanah,As-Saff,Al-Jumu'ah,Al-Munafiqun,At-Taghabun,At-Talaq,At-Tahrim,Al-Mulk,Al-Qalam,Al-Haqqah,Al-Ma'arij,Nuh,Al-Jinn,Al-Muzzammil,Al-Muddaththir,Al-Qiyamah,Al-Insan,Al-Mursalat,An-Naba,An-Nazi'at,Abasa,At-Takwir,Al-Infitar,Al-Mutaffifin,Al-Inshiqaq,Al-Buruj,At-Tariq,Al-A'la,Al-Ghashiyah,Al-Fajr,Al-Balad,Ash-Shams,Al-Layl,Ad-Duha,Ash-Sharh,At-Tin,Al-Alaq,Al-Qadr,Al-Bayyinah,Az-Zalzalah,Al-Adiyat,Al-Qari'ah,At-Takathur,Al-Asr,Al-Humazah,Al-Fil,Quraysh,Al-Ma'un,Al-Kawthar,Al-Kafirun,An-Nasr,Al-Masad,Al-Ikhlas,Al-Falaq,An-Nas".split(",");
 const AYAT=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
 const PRAYERS=[["fajr","Fajr","فجر"],["zuhr","Zuhr","ظہر"],["asr","Asr","عصر"],["maghrib","Maghrib","مغرب"],["isha","Isha","عشاء"]];
-const BACKFILL=7, TARJUMA_N=4, TAJWEED_DAYS=3, STORE="deen-diary-v1";
+const BACKFILL=7, STORE="deen-diary-v1";
+const DEFAULT_GOALS={read:{on:false,n:5},tar:{on:true,n:4},taj:{on:true,days:3},dhikr:{on:true}};
+/* dhikr phrases (Arabic as commonly written) with default daily targets */
+const DHIKR=[{id:"subhan",ar:"سُبْحَانَ اللّٰهِ",n:33},{id:"hamd",ar:"اَلْحَمْدُ لِلّٰهِ",n:33},{id:"akbar",ar:"اَللّٰهُ أَكْبَرُ",n:34},{id:"durood",ar:"اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ",n:100}];
 const MILESTONES=[[3,"🌱"],[7,"🌻"],[14,"🌷"],[30,"🌳"],[40,"🌴"],[100,"🏵️"]];
 const RARITY={c:{w:70,bonus:0},r:{w:23,bonus:25},l:{w:7,bonus:75}};
 /* flower species: shape decides how petals are drawn */
@@ -42,7 +45,7 @@ try{hijriFmt=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",m
 const hijri=d=>hijriFmt?hijriFmt.format(d).replace(/\s?AH$/,"")+" AH":"";
 const gFmt=new Intl.DateTimeFormat("en-GB",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
 
-function fresh(){return{lang:"roman",days:{},tarjumaPos:{surah:1,ayah:1},tajweedPos:{surah:1,ruku:1},
+function fresh(){return{lang:"roman",days:{},goals:JSON.parse(JSON.stringify(DEFAULT_GOALS)),readPos:{surah:1,ayah:1},tarjumaPos:{surah:1,ayah:1},tajweedPos:{surah:1,ruku:1},
   routine:[{id:uid(),name:"Subah ke azkar"},{id:uid(),name:"Shaam ke azkar"},{id:uid(),name:"Walk / exercise"}],
   todos:[],badges:{},flowers:{},seenFlowers:0,periodOn:true}}
 /* ---- accounts: each phone keeps its own accounts; data stored per account ---- */
@@ -54,7 +57,7 @@ async function hashPin(name,pin){const txt="dd:"+name.trim().toLowerCase()+":"+p
   try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
   catch(e){let h=7;for(const c of txt)h=(h*31+c.charCodeAt(0))|0;return"s"+h}}
 function loadAccount(id){me=accounts.find(a=>a.id===id);let d=null;try{d=JSON.parse(ls.get(STORE+":"+id)||"null")}catch(e){}
-  const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d)S.lang=lang;ls.set(SES,id)}
+  const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d)S.lang=lang;if(d&&Object.keys(S.days).length&&S.onboarded===undefined)S.onboarded=S.toured=true;ls.set(SES,id)}
 function save(){if(!me)return;if(sb){S._updated=Date.now();Cloud.queue(S)}else ls.set(STORE+":"+me.id,JSON.stringify(S))}
 /* first email sign-in on a phone that still has PIN-account data: carry that data over once */
 function legacyData(){if(ls.get("deen-diary-migrated"))return null;
@@ -65,10 +68,12 @@ async function enterCloud(user){const m=user.user_metadata||{};Cloud.user=user;
   document.getElementById("view").innerHTML=`<div class="card"><div class="muted" style="text-align:center">…</div></div>`;
   let d=await Cloud.load();if(!d)d=legacyData();
   const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d){S.lang=lang;S.periodOn=me.gender==="female"}
-  if(!S.gender)S.gender=me.gender;tab="today";sel=TODAY();save();render()}
+  if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
 {const sid=ls.get(SES);if(sid&&accounts.some(a=>a.id===sid))loadAccount(sid)}
 const LANGS=["en","ur","roman"];
 const T=()=>L[S.lang]||L.en;
+const G=()=>{const g=S.goals||(S.goals={});for(const k in DEFAULT_GOALS)if(!g[k])g[k]=JSON.parse(JSON.stringify(DEFAULT_GOALS[k]));return g};
+const TARJUMA_N=()=>Math.max(1,+G().tar.n||4), TAJWEED_DAYS=()=>Math.max(1,+G().taj.days||3), READ_N=()=>Math.max(1,+G().read.n||5);
 
 const TODAY=()=>key(new Date());
 let sel=TODAY(), tab="today", calMonth=new Date(), reportRange=7, justBloomed=null;
@@ -81,12 +86,13 @@ const prayed=d=>d?PRAYERS.filter(([p])=>["ontime","qaza"].includes(d.prayers[p])
 const namazOK=d=>prayed(d)===5;
 const tarOK=d=>d&&!!d.tarjuma;
 const tajOK=d=>d&&!!d.tajweed;
-const fullOK=d=>namazOK(d)&&tarOK(d)&&tajOK(d);
+const readOK=d=>d&&!!d.reading;
+const fullOK=d=>{const g=G();return namazOK(d)&&(!g.tar.on||tarOK(d))&&(!g.taj.on||tajOK(d))&&(!g.read.on||readOK(d))};
 function status(k){const d=peek(k);if(d&&d.period)return"period";if(fullOK(d))return"complete";
   if(d&&(prayed(d)||d.tarjuma||d.tajweed))return"partial";return k<TODAY()?"missed":"none"}
 function points(d){if(!d)return 0;let p=0;
   PRAYERS.forEach(([x])=>{if(d.prayers[x]==="ontime")p+=10;else if(d.prayers[x]==="qaza")p+=5});
-  if(d.tarjuma)p+=20;if(d.tajweed)p+=20;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
+  if(d.tarjuma)p+=20;if(d.tajweed)p+=20;if(d.reading)p+=20;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
 function earliest(){const ks=Object.keys(S.days).sort();return ks[0]||TODAY()}
 function streak(pred){const first=earliest();let k=TODAY(),n=0;const t=peek(k);if(!(t&&t.period)&&!pred(t))k=key(add(parse(k),-1));
   while(k>=first){const d=peek(k);if(d&&d.period){}else if(pred(d))n++;else break;k=key(add(parse(k),-1))}return n}
@@ -95,14 +101,16 @@ const flowerBonus=()=>Object.entries(S.flowers).reduce((a,[k,f])=>a+(S.days[k]&&
 const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
 
 /* ---- quran positions ---- */
-function doTarjuma(k){const d=dayOf(k);
-  if(d.tarjuma){const t=d.tarjuma;if(S.tarjumaPos.surah===t.surah&&S.tarjumaPos.ayah===t.to+1)S.tarjumaPos.ayah=t.from;d.tarjuma=null;return}
-  let{surah,ayah}=S.tarjumaPos;if(ayah>AYAT[surah-1]){surah=Math.min(114,surah+1);ayah=1}
-  const to=Math.min(AYAT[surah-1],ayah+TARJUMA_N-1);d.tarjuma={surah,from:ayah,to};S.tarjumaPos={surah,ayah:to+1}}
+function doAyahGoal(k,field,posKey,n){const d=dayOf(k);
+  if(d[field]){const t=d[field],pos=S[posKey];if(pos.surah===t.surah&&pos.ayah===t.to+1)pos.ayah=t.from;d[field]=null;return}
+  let{surah,ayah}=S[posKey];if(ayah>AYAT[surah-1]){surah=Math.min(114,surah+1);ayah=1}
+  const to=Math.min(AYAT[surah-1],ayah+n-1);d[field]={surah,from:ayah,to};S[posKey]={surah,ayah:to+1}}
+const doTarjuma=k=>doAyahGoal(k,"tarjuma","tarjumaPos",TARJUMA_N());
+const doReading=k=>doAyahGoal(k,"reading","readPos",READ_N());
 const tajCount=(s,r)=>Object.values(S.days).filter(d=>d.tajweed&&d.tajweed.surah===s&&d.tajweed.ruku===r).length;
 function doTajweed(k){const d=dayOf(k);if(d.tajweed){d.tajweed=null;return}
   const{surah,ruku}=S.tajweedPos;d.tajweed={surah,ruku};
-  if(tajCount(surah,ruku)>=TAJWEED_DAYS){S.tajweedPos.ruku=ruku+1;toast(T().rukuDone(ruku))}}
+  if(tajCount(surah,ruku)>=TAJWEED_DAYS()){S.tajweedPos.ruku=ruku+1;toast(T().rukuDone(ruku))}}
 
 /* ---- rewards ---- */
 function checkBadges(){const lines=[["full",T().sFull,streak(fullOK)],["namaz",T().sNamaz,streak(namazOK)]];const got=[];
@@ -144,11 +152,22 @@ function streakRow(){const t=T();return`<div class="streaks">
 function reminderCard(){const t=T(),i=Math.floor(parse(TODAY())/864e5)%REMINDERS.length,r=REMINDERS[(i+REMINDERS.length)%REMINDERS.length];
   return`<div class="card reminder"><h2>${t.reminder}<small>${hijri(new Date())}</small></h2><div class="ayah" lang="ar" dir="rtl">${r.ar}</div><div class="q">“${r[S.lang]||r.en}”</div><div class="ref">QURAN ${r.ref} · ${TRANSLATOR[S.lang]||TRANSLATOR.en}</div></div>`}
 
+function ayahCard(d,dis,field,posKey,selId,inId,btnId,n,title,ar,btnLbl){const t=T(),pos=S[posKey],rec=d[field];
+  let ns=pos.surah,na=pos.ayah;if(na>AYAT[ns-1]){ns=Math.min(114,ns+1);na=1}const nt=Math.min(AYAT[ns-1],na+n-1);
+  return`<div class="card"><h2><span>${title}<span class="ar">${ar}</span></span><small>${t.tarSub(n)}</small></h2>
+    <div class="row"><select id="${selId}" aria-label="Surah"${dis}>${surahOptions(pos.surah)}</select>
+      <input type="number" id="${inId}" min="1" value="${Math.min(pos.ayah,AYAT[pos.surah-1])}" style="width:80px" aria-label="${t.nextAyah}"${dis}></div>
+    <div class="goal">${rec?t.tarDone(SURAH[rec.surah-1],rec.from,rec.to):t.tarGoal(SURAH[ns-1],na,nt)}</div>
+    <button class="btn ${rec?"done":"primary"}" id="${btnId}"${dis}>${rec?t.tarUndo:btnLbl}</button></div>`}
+function dhikrCard(d,dis){const t=T(),c=d.dhikr||{};
+  return`<div class="card"><h2><span>${t.dhikr}<span class="ar">ذکر</span></span><small>${t.dhikrSub}</small></h2><div class="dhikr">
+    ${DHIKR.map(x=>{const v=c[x.id]||0,done=v>=x.n;return`<div class="dz${done?" done":""}"><button class="dzbtn" data-dz="${x.id}"${dis} aria-label="${x.ar} +1">
+      <span class="ar" lang="ar">${x.ar}</span><b>${v}<small>/${x.n}</small></b><i style="width:${Math.min(100,v/x.n*100)}%"></i></button>
+      <button class="x" data-dzminus="${x.id}"${dis} aria-label="−1">−</button></div>`}).join("")}</div></div>`}
 function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},note:""},can=editable(sel),dd=parse(sel),dis=can?"":" disabled";
   let chips="";for(let i=BACKFILL;i>=0;i--){const k=key(add(new Date(),-i)),x=parse(k);
     chips+=`<button class="day" data-day="${k}" aria-pressed="${k===sel}">${i===0?t.today:i===1?t.yday:x.toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"short"})}<b>${x.getDate()}</b><span class="dot ${status(k)}"></span></button>`}
-  const tp=S.tarjumaPos;let ns=tp.surah,na=tp.ayah;if(na>AYAT[ns-1]){ns=Math.min(114,ns+1);na=1}
-  const nt=Math.min(AYAT[ns-1],na+TARJUMA_N-1),jp=S.tajweedPos,jc=tajCount(jp.surah,jp.ruku);
+  const g=G(),tp=S.tarjumaPos,jp=S.tajweedPos,jc=tajCount(jp.surah,jp.ruku),TD=TAJWEED_DAYS();
   return`${sel===TODAY()?reminderCard():""}${streakRow()}
   <div class="card"><div class="days">${chips}</div>
     <div class="datehead"><b>${gFmt.format(dd)}</b><div class="hijri">${hijri(dd)}</div></div>
@@ -157,17 +176,16 @@ function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},not
   ${d.period?`<div class="card excused">${t.excused}</div>`:`
   <div class="card"><h2><span>${t.namaz}<span class="ar">نماز</span></span><small>${prayed(d)}/5</small></h2>
     ${PRAYERS.map(([p,n,ar])=>`<div class="prayer"><span><i>${ar}</i>${n}</span><div class="seg">${["ontime","qaza","missed"].map(v=>`<button class="${v}${d.prayers[p]===v?" on":""}" data-pray="${p}" data-v="${v}"${dis}>${t[v]}</button>`).join("")}</div></div>`).join("")}</div>
-  <div class="card"><h2><span>${t.tar}<span class="ar">ترجمہ</span></span><small>${t.tarSub(TARJUMA_N)}</small></h2>
-    <div class="row"><select id="tarSurah" aria-label="Surah"${dis}>${surahOptions(tp.surah)}</select>
-      <input type="number" id="tarAyah" min="1" value="${Math.min(tp.ayah,AYAT[tp.surah-1])}" style="width:80px" aria-label="${t.nextAyah}"${dis}></div>
-    <div class="goal">${d.tarjuma?t.tarDone(SURAH[d.tarjuma.surah-1],d.tarjuma.from,d.tarjuma.to):t.tarGoal(SURAH[ns-1],na,nt)}</div>
-    <button class="btn ${d.tarjuma?"done":"primary"}" id="tarDo"${dis}>${d.tarjuma?t.tarUndo:t.tarBtn}</button></div>
-  <div class="card"><h2><span>${t.taj}<span class="ar">تجوید</span></span><small>${t.tajSub(TAJWEED_DAYS)}</small></h2>
+  ${g.read.on?ayahCard(d,dis,"reading","readPos","readSurah","readAyah","readDo",READ_N(),t.read,"تلاوت",t.readBtn):""}
+  ${g.tar.on?ayahCard(d,dis,"tarjuma","tarjumaPos","tarSurah","tarAyah","tarDo",TARJUMA_N(),t.tar,"ترجمہ",t.tarBtn):""}
+  ${g.taj.on?`<div class="card"><h2><span>${t.taj}<span class="ar">تجوید</span></span><small>${t.tajSub(TD)}</small></h2>
     <div class="row"><select id="tajSurah" aria-label="Surah"${dis}>${surahOptions(jp.surah)}</select>
       <input type="number" id="tajRuku" min="1" value="${jp.ruku}" style="width:80px" aria-label="${t.ruku}"${dis}></div>
-    <div class="row"><div class="pips">${[...Array(TAJWEED_DAYS)].map((_,i)=>`<span class="pip${i<jc?" on":""}"></span>`).join("")}</div><span class="muted">${t.tajDay(Math.min(jc,TAJWEED_DAYS),TAJWEED_DAYS)}</span></div>
+    <div class="row"><div class="pips">${[...Array(TD)].map((_,i)=>`<span class="pip${i<jc?" on":""}"></span>`).join("")}</div><span class="muted">${t.tajDay(Math.min(jc,TD),TD)}</span></div>
     <div class="goal">${d.tajweed?t.tajDone(SURAH[d.tajweed.surah-1],d.tajweed.ruku):t.tajGoal(SURAH[jp.surah-1],jp.ruku)}</div>
-    <button class="btn ${d.tajweed?"done":"primary"}" id="tajDo"${dis}>${d.tajweed?t.tajUndo:t.tajBtn}</button></div>`}
+    <button class="btn ${d.tajweed?"done":"primary"}" id="tajDo"${dis}>${d.tajweed?t.tajUndo:t.tajBtn}</button></div>`:""}
+  ${!g.read.on&&!g.tar.on&&!g.taj.on?`<div class="card empty"><b>${t.noQuranGoal}</b><button class="btn primary" data-goto="profile">${t.setGoals}</button></div>`:""}`}
+  ${g.dhikr.on?dhikrCard(d,dis):""}
   <div class="card"><h2>${t.routine}<small><a href="#tasks" data-goto="tasks" style="color:var(--green)">${t.edit}</a></small></h2>
     ${S.routine.length?S.routine.map(r=>`<div class="check${d.tasks&&d.tasks[r.id]?" done":""}"><input type="checkbox" id="r_${r.id}" data-rt="${r.id}" ${d.tasks&&d.tasks[r.id]?"checked":""}${dis}><label for="r_${r.id}">${esc(r.name)}</label></div>`).join(""):`<div class="muted">${t.noRoutine}</div>`}</div>
   <div class="card"><h2>${t.note}</h2><textarea id="note" style="min-height:70px;font-family:var(--body);font-size:.9rem" placeholder="${t.notePh}"${dis}>${esc(d.note||"")}</textarea>
@@ -289,6 +307,14 @@ function vReport(){const t=T(),days=[];for(let i=reportRange-1;i>=0;i--)days.pus
     <div class="barlabels">${days.map(k=>`<span>${reportRange===7||parse(k).getDate()%5===0?parse(k).getDate():""}</span>`).join("")}</div></div>
   <div class="card"><h2>${t.history}</h2>${hist?`<div class="tablewrap"><table><tr>${t.th.map(h=>`<th>${h}</th>`).join("")}</tr>${hist}</table></div>`:`<div class="muted">${t.noRecord}</div>`}</div>`}
 
+function goalsCard(wizard){const t=T(),g=G(),num=(id,v,opts)=>`<select id="${id}">${opts.map(o=>`<option value="${o}"${+v===o?" selected":""}>${o}</option>`).join("")}${opts.includes(+v)?"":`<option selected>${v}</option>`}</select>`;
+  const row=(k,label,extra)=>`<div class="goalrow"><label class="toggle"><input type="checkbox" data-goal="${k}" ${g[k].on?"checked":""}> <b>${label}</b></label>${extra||""}</div>`;
+  return`<div class="card${wizard?" wizard":""}"><h2>${wizard?t.wizTitle:t.myGoals}</h2>${wizard?`<div class="muted">${t.wizSub}</div>`:""}
+    ${row("read",t.read,`<span class="muted">${t.ayahPerDay}</span>${num("gReadN",g.read.n,[3,5,10,15,20])}`)}
+    ${row("tar",t.tar,`<span class="muted">${t.ayahPerDay}</span>${num("gTarN",g.tar.n,[3,4,5,10,15])}`)}
+    ${row("taj",t.taj,`<span class="muted">${t.daysPerRuku}</span>${num("gTajD",g.taj.days,[1,2,3,4,5])}`)}
+    ${row("dhikr",t.dhikr,"")}
+    ${wizard?`<div class="row"><button class="btn primary" id="wizDone">${t.wizStart}</button><button class="linkbtn" id="wizSkip">${t.skip}</button></div>`:`<div class="muted">${t.goalsNote}</div>`}</div>`}
 function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div class="card"><h2>${t.profile}</h2>
     ${sb?`<form class="authform" id="nameForm"><label for="pName">${t.fullName}</label><div class="row"><input type="text" id="pName" value="${esc(me.name)}" maxlength="60" style="flex:1"><button class="btn small">${t.save}</button></div></form>
     <div class="muted">${t.email}: <b>${esc(me.email)}</b></div>`:`<div class="muted">${t.name}: <b>${esc(me.name)}</b></div>`}
@@ -298,7 +324,8 @@ function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div
       <label for="pPw">${t.newPw}</label><input type="password" id="pPw" autocomplete="new-password" minlength="8" required>
       <label for="pPw2">${t.confirmPw}</label><input type="password" id="pPw2" autocomplete="new-password" minlength="8" required>
       <div class="err" id="pErr" role="alert"></div><button class="btn">${t.changePw}</button></form></div>`:""}
-  <div class="card"><div class="row"><button class="btn" id="logout2">${t.logout}</button></div></div>
+  ${goalsCard()}
+  <div class="card"><div class="row"><button class="btn" id="tourAgain">${t.tourAgain}</button><button class="btn" id="logout2">${t.logout}</button></div></div>
   ${sb?`<div class="card"><h2>${t.delAcc}</h2><div class="muted">${t.delAccSub}</div><div class="row"><button class="btn danger" id="delAcc">${t.delAcc}</button><span class="muted" id="delMsg"></span></div></div>`:""}`}
 
 function pwIssue(pw,t){return pw.length<8||!/[A-Za-z]/.test(pw)||!/\d/.test(pw)?t.pwWeak:""}
@@ -378,9 +405,11 @@ function render(){const t=T(),hr=new Date().getHours();
   document.getElementById("totalPts").textContent=totalPoints();document.getElementById("ptsLbl").textContent=t.pts;document.getElementById("ringLbl").textContent=t.ring;
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===S.lang));
   document.getElementById("tabs").innerHTML=TABS.map((id,i)=>`<button data-tab="${id}" role="tab" aria-selected="${id===tab}">${t.tabs[i]}</button>`).join("");
-  const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const g=prayed(td)+(td.tarjuma?1:0)+(td.tajweed?1:0)+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(7+S.routine.length)*100)}
+  const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const gl=G(),on=["read","tar","taj"].filter(k=>gl[k].on),f={read:"reading",tar:"tarjuma",taj:"tajweed"};const g=prayed(td)+on.filter(k=>td[f[k]]).length+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(5+on.length+S.routine.length)*100)}
   document.getElementById("ringVal").style.strokeDashoffset=226.2*(1-pct/100);document.getElementById("ringPct").textContent=pct+"%";
   const v=document.getElementById("view");v.style.animation="none";void v.offsetWidth;v.style.animation="";
+  if(!S.onboarded){v.innerHTML=`<div class="card welcome"><div class="authicon">🌿</div><h2 style="justify-content:center">${t.welcomeTitle}</h2><div class="muted" style="text-align:center">${t.welcomeSub}</div></div>`+goalsCard(true);return}
+  if(!S.toured)setTimeout(startTour,300);
   v.innerHTML={today:vToday,calendar:vCalendar,garden:vGarden,tasks:vTasks,report:vReport,profile:vProfile}[tab]()}
 
 /* ---- events ---- */
@@ -405,6 +434,11 @@ view.addEventListener("click",e=>{
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.id==="tarDo"){doTarjuma(sel);return commit()}
+  if(t.id==="readDo"){doReading(sel);return commit()}
+  if(t.dataset.dz){const d=dayOf(sel);d.dhikr=d.dhikr||{};d.dhikr[t.dataset.dz]=(d.dhikr[t.dataset.dz]||0)+1;if(navigator.vibrate)try{navigator.vibrate(8)}catch(_){}return commit()}
+  if(t.dataset.dzminus){const d=dayOf(sel);d.dhikr=d.dhikr||{};d.dhikr[t.dataset.dzminus]=Math.max(0,(d.dhikr[t.dataset.dzminus]||0)-1);return commit()}
+  if(t.id==="wizDone"||t.id==="wizSkip"){S.onboarded=true;save();return render()}
+  if(t.id==="tourAgain"){S.toured=false;tab="today";save();render();return}
   if(t.id==="tajDo"){doTajweed(sel);return commit()}
   if(t.dataset.rt){const d=dayOf(tab==="tasks"?TODAY():sel);d.tasks[t.dataset.rt]=t.checked;return commit()}
   if(t.dataset.delrt){S.routine=S.routine.filter(r=>r.id!==t.dataset.delrt);return commit()}
@@ -416,6 +450,12 @@ view.addEventListener("click",e=>{
 view.addEventListener("change",e=>{const t=e.target;
   if(t.id==="period"){dayOf(sel).period=t.checked;return commit()}
   if(t.id==="periodOn"){S.periodOn=t.checked;return commit()}
+  if(t.dataset.goal){G()[t.dataset.goal].on=t.checked;return commit()}
+  if(t.id==="gReadN"){G().read.n=+t.value;return commit()}
+  if(t.id==="gTarN"){G().tar.n=+t.value;return commit()}
+  if(t.id==="gTajD"){G().taj.days=+t.value;return commit()}
+  if(t.id==="readSurah"){S.readPos={surah:+t.value,ayah:1};return commit()}
+  if(t.id==="readAyah"){const s=S.readPos.surah;S.readPos.ayah=Math.max(1,Math.min(AYAT[s-1],+t.value||1));return commit()}
   if(t.id==="tarSurah"){S.tarjumaPos={surah:+t.value,ayah:1};return commit()}
   if(t.id==="tarAyah"){const s=S.tarjumaPos.surah;S.tarjumaPos.ayah=Math.max(1,Math.min(AYAT[s-1],+t.value||1));return commit()}
   if(t.id==="tajSurah"){S.tajweedPos={surah:+t.value,ruku:1};return commit()}
@@ -443,3 +483,15 @@ if(sb){
 }
 render();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+/* ---- guided tour: one tab at a time ---- */
+let tourStep=-1;
+function startTour(){if(tourStep>=0||!me||S.toured)return;tourStep=0;showTour()}
+function showTour(){const t=T(),steps=t.tour,r=document.getElementById("popRoot"),st=steps[tourStep];
+  document.querySelectorAll("nav button").forEach((b,i)=>b.classList.toggle("tourhi",i===st.tab));
+  r.innerHTML=`<div class="tour" role="dialog" aria-label="${t.tourTitle}"><div class="card"><div class="muted">${tourStep+1} / ${steps.length}</div><h2>${st.h}</h2><p style="margin:0">${st.p}</p>
+    <div class="row" style="justify-content:space-between"><button class="linkbtn" data-tour="skip">${t.skip}</button>
+    <span class="row">${tourStep?`<button class="btn small" data-tour="back">${t.back}</button>`:""}<button class="btn primary small" data-tour="next">${tourStep===steps.length-1?t.finish:t.next}</button></span></div></div></div>`}
+function endTour(){tourStep=-1;S.toured=true;save();document.getElementById("popRoot").innerHTML="";document.querySelectorAll(".tourhi").forEach(b=>b.classList.remove("tourhi"))}
+document.getElementById("popRoot").addEventListener("click",e=>{const b=e.target.closest("[data-tour]");if(!b)return;const a=b.dataset.tour,n=T().tour.length;
+  if(a==="skip")return endTour();if(a==="back")tourStep=Math.max(0,tourStep-1);if(a==="next"){if(tourStep>=n-1)return endTour();tourStep++}showTour()});
