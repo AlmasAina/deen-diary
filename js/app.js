@@ -68,7 +68,7 @@ async function enterCloud(user){const m=user.user_metadata||{};Cloud.user=user;
   document.getElementById("view").innerHTML=`<div class="card"><div class="muted" style="text-align:center">…</div></div>`;
   let d=await Cloud.load();if(!d)d=legacyData();
   const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d){S.lang=lang;S.periodOn=me.gender==="female"}
-  if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
+  checkAdmin().then(()=>{if(tab==="profile")render()});loadDbQuestions().then(()=>{if(tab==="quiz"||tab==="today")render()});if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
 {const sid=ls.get(SES);if(sid&&accounts.some(a=>a.id===sid))loadAccount(sid)}
 const LANGS=["en","ur","roman"];
 const T=()=>L[S.lang]||L.en;
@@ -296,6 +296,7 @@ function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div
   ${prayerSettingsCard()}
   ${goalsCard()}
   <div class="card"><div class="field"><label for="ramMode">${t.ramadanMode}</label><select id="ramMode">${["auto","on","off"].map(v=>`<option value="${v}"${(S.ramadanMode||"auto")===v?" selected":""}>${t.ramModes[v]}</option>`).join("")}</select></div><div class="muted small">${t.ramModeHelp}</div></div>
+  ${isAdmin?`<div class="card admin-entry"><b>🛡️ ${T().adm.title}</b><div class="muted small">${T().adm.entryHelp}</div><button class="btn primary" data-goto="admin">${T().adm.open}</button></div>`:""}
   <div class="card"><div class="row"><button class="btn" id="tourAgain">${t.tourAgain}</button><button class="btn" id="logout2">${t.logout}</button></div></div>
   ${sb?`<div class="card"><h2>${t.delAcc}</h2><div class="muted">${t.delAccSub}</div><div class="row"><button class="btn danger" id="delAcc">${t.delAcc}</button><span class="muted" id="delMsg"></span></div></div>`:""}`}
 
@@ -361,7 +362,7 @@ async function doAuth(form){const t=T(),name=document.getElementById("aName").va
     if(!legacy)S.periodOn=document.getElementById("aPeriod").checked;save();tab="today";sel=TODAY();toast(t.welcome(name));return render()}
   if(!found||found.pin!==await hashPin(name,pin))return err.textContent=t.wrong;
   loadAccount(found.id);tab="today";sel=TODAY();toast(t.welcome(found.name));render()}
-function logout(){if(sb){Cloud.push(S).finally(()=>sb.auth.signOut());Cloud.user=null;me=null;S.days={};authMode="in";return render()}save();ls.del(SES);me=null;authMode="in";render()}
+function logout(){isAdmin=false;if(tab==="admin")tab="today";if(sb){Cloud.push(S).finally(()=>sb.auth.signOut());Cloud.user=null;me=null;S.days={};authMode="in";return render()}save();ls.del(SES);me=null;authMode="in";render()}
 let lastView="";
 function render(){const t=T(),hr=new Date().getHours();
   document.documentElement.lang={en:"en",ur:"ur",roman:"ur-Latn"}[S.lang]||"en";document.documentElement.dir=t.dir||"ltr";
@@ -384,7 +385,7 @@ function render(){const t=T(),hr=new Date().getHours();
   if(!S.toured)setTimeout(startTour,300);
   schedulePrayerReminder();
   if(tab==="today"&&azOpen&&AZKAR[azOpen]){v.innerHTML=azkarView();return}
-  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz}[tab]()}
+  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz,admin:vAdmin}[tab]()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");
@@ -408,6 +409,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
+  if(adminClick(t))return;
   if(quizClick(t))return commit();
   if(t.dataset.azopen){azOpen=t.dataset.azopen;render();scrollTo(0,0);return}
   if(t.id==="azBack"){azOpen=null;return render()}
@@ -449,6 +451,7 @@ view.addEventListener("change",e=>{const t=e.target;
     if(!("Notification"in window)){t.checked=false;msg.textContent=tr.ptNotifNo;return}
     Notification.requestPermission().then(r=>{if(r==="granted"){p.notify=true;commit()}else{t.checked=false;msg.textContent=tr.ptNotifDenied}});return}
   if(t.id==="jFilter"){jFilter=t.value;return render()}
+  if(adminChange(t))return;
   if(t.id==="qhCat"){qz.filter.cat=t.value;return render()}
   if(t.id==="qhRes"){qz.filter.res=t.value;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}
@@ -458,6 +461,7 @@ view.addEventListener("input",e=>{if(e.target.id==="litName"){const er=document.
 view.addEventListener("submit",e=>{e.preventDefault();
   if(e.target.id==="signin"||e.target.id==="signup")return doAuth(e.target.id);
   if(e.target.id.startsWith("auth-"))return doAuthEmail(e.target.id);
+  if(adminSubmit(e.target))return;
   if(e.target.id==="jForm"){if(saveJournal())commit();return}
   if(e.target.id==="litForm"){const er=addTopic(document.getElementById("litName").value,document.getElementById("litMin").value);
     if(er){document.getElementById("litErr").textContent=er;return}return commit()}

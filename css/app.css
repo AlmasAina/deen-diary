@@ -391,3 +391,14 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .qfeed.ok b{color:var(--green)}.qfeed.no b{color:var(--bad)}
 .qhist.ok{border-inline-start:4px solid var(--green)}.qhist.no{border-inline-start:4px solid var(--bad)}
 .pip.bad{background:var(--bad)}
+
+/* ---- admin ---- */
+.admnav .chip.on{background:var(--green);color:var(--card);border-style:solid}
+.admin-entry{border-color:var(--gold)}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:.75rem}
+.qtable td{white-space:normal;vertical-align:top}
+.qtable .qcell{min-width:180px;max-width:320px}
+.qtable .acts{white-space:nowrap}
+.qtable .acts .linkbtn{padding:2px 4px;font-size:.8rem}
+.urow{gap:6px}
+#admEditForm textarea{min-height:0;font-family:var(--body);font-size:.9rem}

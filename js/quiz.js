@@ -25,12 +25,15 @@ function quizBank(){if(_bank)return _bank;const B=[],S_=i=>SURAH[i-1];
   Q_SAJDAS.forEach(([c,v],i)=>{const pool=Q_SAJDAS.filter(([c2,v2])=>c2!==c&&v2!==v).map(([c2])=>S_(c2));gen("saj-"+(i+1),"sajda",[v],S_(c),wrongs(S_(c),pool,"sj"+i),"Tanzil")});
   Q_JUZ_START.forEach(([c,v],i)=>{gen("jst-"+(i+1),"juzstart",[i+1],S_(c),wrongs(S_(c),[c-1,c+1,c+2,c-2,c+3].filter(x=>x>=1&&x<=114&&x!==c).map(S_),"js"+i),"Tanzil")});
   QUIZ_CURATED.forEach(q=>B.push({id:q.id,cat:q.cat,src:q.src,cur:q,ans:"0",opts:shuffled(["0","1","2","3"],q.id),ref:q.ref}));
+  /* admin-managed rows replace built-in questions with the same id; anything not published is left out */
+  const dbq=typeof DBQ==="object"&&DBQ?Object.values(DBQ):[];
+  if(dbq.length){const ids=new Set(dbq.map(r=>r.id));const kept=B.filter(q=>!ids.has(q.id));dbq.filter(r=>r.status==="published").forEach(r=>kept.push(rowToQ(r)));_bank=kept;return kept}
   _bank=B;return B}
 const qById=id=>quizBank().find(q=>q.id===id);
 /* text of a question, its options and explanation in the current language */
-function qText(q){const t=T();if(q.cur)return q.cur.q[S.lang]||q.cur.q.en;return t.qz[q.kind](...q.args)}
-function qOpt(q,o){if(q.cur){const x=q.cur.o[+o];return S.lang==="ur"?x[1]:x[0]}return o}
-function qExpl(q){const t=T();if(q.cur)return q.cur.e[S.lang]||q.cur.e.en;return t.qzExpl(q.kind,q.args,q.ans)}
+function qText(q){const t=T();if(q.cur)return q.cur.q[S.lang]||q.cur.q.en||"";return t.qz[q.kind](...q.args)}
+function qOpt(q,o){if(q.cur){const x=q.cur.o[+o];if(!x)return"";if(Array.isArray(x))return S.lang==="ur"?x[1]:x[0];return x[S.lang]||x.en||""}return o}
+function qExpl(q){const t=T();if(q.cur)return esc((q.cur.e||{})[S.lang]||(q.cur.e||{}).en||"");return t.qzExpl(q.kind,q.args,q.ans)}
 function catOf(q){return q.cat}
 
 /* ---- state ---- */
