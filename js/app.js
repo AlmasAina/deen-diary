@@ -423,6 +423,7 @@ view.addEventListener("change",e=>{const t=e.target;
   if(learnChange(t))return commit();
   if(t.id==="note"){dayOf(sel).note=t.value;save()}});
 view.addEventListener("keydown",e=>{const b=e.target.closest&&e.target.closest("[data-bud]");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openBud(b.dataset.bud)}});
+view.addEventListener("input",e=>{if(e.target.id==="litName"){const er=document.getElementById("litErr");if(er)er.textContent=""}});
 view.addEventListener("submit",e=>{e.preventDefault();
   if(e.target.id==="signin"||e.target.id==="signup")return doAuth(e.target.id);
   if(e.target.id.startsWith("auth-"))return doAuthEmail(e.target.id);
