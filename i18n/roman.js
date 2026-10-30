@@ -110,4 +110,7 @@
     qualityNote:"Publish se pehle: jawab check karein, wazahat aur hawala likhein, aur tarjume dekh lein. Ghair tasdeeq shuda sawal kabhi publish na karein.",
     vQ:"Sawal English mein likhein.",vOpts:"Chaaron options English mein likhein.",vCorrect:"Sahi option chunein.",vDupOpts:"Chaaron options alag hone chahiye.",vPublish:"Publish ke liye English wazahat aur hawala zaroori hai.",
     saving:"Save ho raha hai…",savedQ:"Sawal save ho gaya",deleted:"Sawal delete ho gaya",byCat:"Qisam ke hisaab se natije",mostWrong:"Sab se zyada ghalat",mostTried:"Sab se zyada hal kiye gaye",ofCorrect:(ok,n)=>`${n} mein se ${ok} sahi`,noData:"Abhi koi data nahi."},
+  hs:{title:"Garden aur ghar",dayN:n=>`${n} mukammal din`,next:(s,d)=>`Agla: <b>${s}</b>, mazeed ${d} mukammal din baad`,allDone:"Sab kuch khul gaya. MashaAllah!",
+    st:{grass:"Hari ghaas",flowers:"Pehle phool",beds:"Phoolon ki kyariyan aur gulab",fountain:"Darakht, pathar ki raah aur fawwara",house:"Aapka ghar",details:"Mehraab, khirkiyan aur bailen",interior:"Ghar ke andar: farnichar aur aaina",bench:"Bench aur parinde",bedroom:"Sone ka kamra",orchard:"Phaldar darakht"},
+    note:"Har mukammal din gina jata hai, streak toot bhi jaye to bhi, is liye jo khul gaya woh kabhi nahi hatta. Yeh garden zaati hosla afzai hai, Jannat ki tasveer ya kisi ki ibadat ka paimana nahi.",gardenView:"Garden",houseView:"Ghar ke andar"},
   bloomedOn:(n,d)=>`${n} · ${d}`};

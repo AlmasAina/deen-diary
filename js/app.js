@@ -216,10 +216,10 @@ function vGarden(){const t=T(),days=completeDays(),N=days.length,hr=new Date().g
     <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${night?"#2d4a2c":"#66b553"}"/><stop offset="1" stop-color="${night?"#18291a":"#3a7a34"}"/></linearGradient></defs>
     <rect width="360" height="250" fill="url(#sky)"/>${stars}${orb}${rainbow}${clouds}
     <path d="M0 150 Q50 118 110 140 T230 128 T360 140 V250 H0z" fill="${night?"#173a2e":"#a8dca0"}" opacity=".6"/>
-    <path d="M0 172 Q60 140 130 165 T260 155 T360 165 V250 H0z" fill="url(#hill)" opacity=".85"/>${fence}
+    <path d="M0 172 Q60 140 130 165 T260 155 T360 165 V250 H0z" fill="url(#hill)" opacity=".85"/>${fence}${backLayer(N,night)}
     <path d="M0 192 Q90 174 180 188 T360 186 V250 H0z" fill="url(#soil)"/>
     <path d="M150 250 Q170 220 182 196 Q186 190 192 196 Q200 222 228 250z" fill="${night?"#3a3326":"#d9c08f"}" opacity=".55"/>
-    <g transform="translate(180,220) scale(${scale}) translate(-180,-220)">${plants}</g>${sprout}${fireflies}${butterflies}${falling}</svg>`;
+    ${frontLayer(N,night)}<g transform="translate(180,220) scale(${scale}) translate(-180,-220)">${plants}</g>${sprout}${fireflies}${butterflies}${falling}</svg>`;
   justBloomed=null;
   const buds=days.filter((k,i)=>(i+1)%7&&(i+1)%30&&(i+1)%40&&!S.flowers[k]);
   const cur=streak(fullOK),next=MILESTONES.find(([m])=>m>cur);
@@ -227,12 +227,14 @@ function vGarden(){const t=T(),days=completeDays(),N=days.length,hr=new Date().g
   const album=SPECIES.map(sp=>{const c=owned[sp.id];return`<div class="sp ${sp.r}${c?"":" locked"}">${miniSVG(sp)}<b>${c?(sp.n[S.lang]||sp.n.en):"???"}</b><span class="tag ${sp.r}">${t.rar[sp.r]}</span>${c>1?`<div class="muted">×${c}</div>`:""}</div>`}).join("");
   const b=[["full",t.sFull],["namaz",t.sNamaz]].map(([id,l])=>MILESTONES.map(([m,icon])=>`<div class="badge${S.badges[id+m]?" got":""}"><b>${icon}</b>${l}<br>${t.ms(m)}</div>`).join("")).join("");
   return`<div class="card"><h2><span>${t.garden}<span class="ar">باغ</span></span><small>${N} ${t.flowers}</small></h2>
-    <div class="scene">${svg}</div>
+    ${has(N,"interior")?`<div class="seg viewtog"><button class="${gView==="garden"?"on ontime":""}" data-gview="garden">🌿 ${t.hs.gardenView}</button><button class="${gView==="house"?"on ontime":""}" data-gview="house">🏡 ${t.hs.houseView}</button></div>`:""}
+    <div class="scene">${gView==="house"&&has(N,"interior")?interiorSVG(N):svg}</div>
     ${buds.length?`<div class="budbar"><span>${t.budsReady(buds.length)}</span><button class="btn primary small" data-bud="${buds[0]}">${t.openBud}</button></div>`:""}
     ${N?"":`<div class="goal">${t.emptyG}</div>`}
     <div class="garden-stats"><div><b>${N}</b><span>${t.statF}</span></div><div><b>${cur}</b><span>${t.statS}</span></div><div><span class="gift">🎁</span><span style="display:block">${next?t.gift(next[0]-cur):t.giftAll}</span></div></div>
     ${next?`<div class="nextgoal" aria-label="${cur}/${next[0]}"><i style="width:${Math.min(100,cur/next[0]*100)}%"></i></div>`:""}
     <div class="muted">${t.keep}</div></div>
+  ${stagesCard(N)}
   <div class="card"><h2>${t.album}<small>${Object.keys(owned).length&&t.found(Object.keys(owned).length,SPECIES.length)||t.found(0,SPECIES.length)}</small></h2><div class="album">${album}</div></div>
   ${streakRow()}
   <div class="card"><h2>${t.badges}</h2><div class="badges">${b}</div></div>`}
@@ -411,6 +413,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
   if(adminClick(t))return;
   if(quizClick(t))return commit();
+  if(t.dataset.gview){gView=t.dataset.gview;return render()}
   if(t.dataset.azopen){azOpen=t.dataset.azopen;render();scrollTo(0,0);return}
   if(t.id==="azBack"){azOpen=null;return render()}
   if(t.dataset.aztap){azTap(+t.dataset.aztap);return commit()}

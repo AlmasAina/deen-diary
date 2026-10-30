@@ -110,4 +110,7 @@
     qualityNote:"Before publishing: check the answer, write an explanation and a source, and review the translations. Never publish unverified questions.",
     vQ:"Write the question in English.",vOpts:"Fill in all four options in English.",vCorrect:"Choose the correct option.",vDupOpts:"The four options must be different.",vPublish:"A published question needs an English explanation and a source.",
     saving:"Saving…",savedQ:"Question saved",deleted:"Question deleted",byCat:"Results by category",mostWrong:"Most often answered wrong",mostTried:"Most attempted",ofCorrect:(ok,n)=>`${ok} of ${n} correct`,noData:"No data yet."},
+  hs:{title:"Garden & house",dayN:n=>`${n} full days`,next:(s,d)=>`Next: <b>${s}</b> in ${d} more full ${d==1?"day":"days"}`,allDone:"Everything is unlocked. MashaAllah!",
+    st:{grass:"Fresh grass",flowers:"First flowers",beds:"Flower beds & roses",fountain:"Trees, stone path & fountain",house:"Your house",details:"Arches, windows & vines",interior:"Inside the house: furniture & mirror",bench:"Garden bench & birds",bedroom:"Bedroom",orchard:"Fruit trees"},
+    note:"Every full day counts, even if a streak breaks, so nothing you unlock is ever removed. This garden is a personal motivation, not a picture of Jannah or a measure of anyone's worship.",gardenView:"Garden",houseView:"Inside the house"},
   bloomedOn:(n,d)=>`${n} · ${d}`};

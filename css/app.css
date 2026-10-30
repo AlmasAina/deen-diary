@@ -402,3 +402,17 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .qtable .acts .linkbtn{padding:2px 4px;font-size:.8rem}
 .urow{gap:6px}
 #admEditForm textarea{min-height:0;font-family:var(--body);font-size:.9rem}
+
+/* ---- garden & house ---- */
+.viewtog{margin-bottom:2px}
+.stages{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.stage{border:1px solid var(--line);border-radius:12px;padding:8px 6px;text-align:center;font-size:.72rem;color:var(--muted);background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.stage b{font-size:.95rem;color:var(--muted)}
+.stage.got{border-color:var(--green);background:var(--green-soft);color:var(--ink)}
+.stage.got b{color:var(--green)}
+.water{animation:spray 1.2s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes spray{to{transform:scaleY(.85);opacity:.75}}
+.ripple{animation:ripple 2.4s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes ripple{from{transform:scale(.3);opacity:.9}to{transform:scale(2.6);opacity:0}}
+.bird{animation:birdfly 22s linear infinite}
+@keyframes birdfly{from{transform:translateX(-120px)}to{transform:translateX(420px)}}
