@@ -313,3 +313,33 @@ nav button.tourhi{outline:3px solid var(--gold-2);outline-offset:2px;animation:n
 @media (min-width:641px){.tour{bottom:auto;top:200px}}
 @media (max-width:380px){.dhikr{grid-template-columns:1fr}}
 .goalrow .toggle input:checked{background:var(--green)}
+
+/* ---- learning preferences ---- */
+.subh{margin:10px 0 0;font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold)}
+html[dir="rtl"] .subh{text-transform:none;letter-spacing:0}
+.pref{border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.pref.flat{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.pref summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;cursor:pointer}
+.pref summary::-webkit-details-marker{display:none}
+.pref summary::after{content:"▾";color:var(--muted);transition:transform .2s}
+.pref[open] summary::after{transform:rotate(180deg)}
+.pref summary .toggle{flex:1;min-width:0}
+.pref summary .ar{font-family:var(--display);color:var(--gold)}
+.prefbody{padding:0 12px 12px;display:flex;flex-direction:column;gap:8px}
+.field{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.field>label:first-child{flex:1;min-width:140px;font-weight:600;font-size:.88rem}
+.field select{flex:0 0 auto}
+.muted.small,.small{font-size:.78rem}
+.pref .toggle input:checked{background:var(--green)}
+.topic{display:flex;gap:6px;align-items:center}
+.topic input[type=text]{flex:1;min-width:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px dashed var(--green);background:none;color:var(--green);border-radius:999px;padding:5px 10px;font:600 .78rem var(--body);cursor:pointer}
+html[dir="rtl"] .chip{font-family:var(--urdu)}
+.rev{border-color:var(--gold)}
+.revrow{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.revrow:last-child{border-bottom:0}
+.lrow{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lrow:last-child{border-bottom:0}
+.lhead{display:flex;justify-content:space-between;gap:8px}
+.lrow.done .lhead b{color:var(--green)}
