@@ -68,7 +68,7 @@ async function enterCloud(user){const m=user.user_metadata||{};Cloud.user=user;
   document.getElementById("view").innerHTML=`<div class="card"><div class="muted" style="text-align:center">…</div></div>`;
   let d=await Cloud.load();if(!d)d=legacyData();
   const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d){S.lang=lang;S.periodOn=me.gender==="female"}
-  checkAdmin().then(()=>{if(tab==="profile")render()});loadDbQuestions().then(()=>{if(tab==="quiz"||tab==="today")render()});if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
+  loadNotify().then(()=>{if(tab==="profile"||tab==="notes")render()});checkAdmin().then(()=>{if(tab==="profile")render()});loadDbQuestions().then(()=>{if(tab==="quiz"||tab==="today")render()});if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
 {const sid=ls.get(SES);if(sid&&accounts.some(a=>a.id===sid))loadAccount(sid)}
 const LANGS=["en","ur","roman"];
 const T=()=>L[S.lang]||L.en;
@@ -296,6 +296,7 @@ function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div
       <label for="pPw2">${t.confirmPw}</label><input type="password" id="pPw2" autocomplete="new-password" minlength="8" required>
       <div class="err" id="pErr" role="alert"></div><button class="btn">${t.changePw}</button></form></div>`:""}
   ${prayerSettingsCard()}
+  ${notifyCard()}
   ${goalsCard()}
   <div class="card"><div class="field"><label for="ramMode">${t.ramadanMode}</label><select id="ramMode">${["auto","on","off"].map(v=>`<option value="${v}"${(S.ramadanMode||"auto")===v?" selected":""}>${t.ramModes[v]}</option>`).join("")}</select></div><div class="muted small">${t.ramModeHelp}</div></div>
   ${isAdmin?`<div class="card admin-entry"><b>🛡️ ${T().adm.title}</b><div class="muted small">${T().adm.entryHelp}</div><button class="btn primary" data-goto="admin">${T().adm.open}</button></div>`:""}
@@ -388,7 +389,7 @@ function render(){const t=T(),hr=new Date().getHours();
   if(!S.toured)setTimeout(startTour,300);
   schedulePrayerReminder();
   if(tab==="today"&&azOpen&&AZKAR[azOpen]){v.innerHTML=azkarView();return}
-  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz,admin:vAdmin}[tab]()}
+  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz,admin:vAdmin,notes:vNotes}[tab]();updateBell()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");
@@ -396,6 +397,7 @@ document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]
 document.querySelector(".lang").onclick=e=>{const b=e.target.closest("[data-lang]");if(b){S.lang=b.dataset.lang;save();ls.set("deen-diary-lang",S.lang);render()}};
 {const lg=ls.get("deen-diary-lang");if(!me&&lg)S.lang=lg}
 document.getElementById("logout").onclick=logout;
+document.getElementById("bell").onclick=()=>{tab="notes";render();scrollTo(0,0)};
 view.addEventListener("click",e=>{
   if(e.target.id==="authSwitch"){authMode=authMode==="up"?"in":"up";return render()}
   const ac=e.target.closest("[data-acct]");if(ac){document.getElementById("aName").value=ac.dataset.acct;return document.getElementById("aPin").focus()}
@@ -413,6 +415,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
   if(adminClick(t))return;
+  if(t.dataset.ntread){markRead(t.dataset.ntread);return}
   if(quizClick(t))return commit();
   if(t.dataset.gview){gView=t.dataset.gview;return render()}
   if(t.dataset.azopen){azOpen=t.dataset.azopen;render();scrollTo(0,0);return}
@@ -456,6 +459,7 @@ view.addEventListener("change",e=>{const t=e.target;
     Notification.requestPermission().then(r=>{if(r==="granted"){p.notify=true;commit()}else{t.checked=false;msg.textContent=tr.ptNotifDenied}});return}
   if(t.id==="jFilter"){jFilter=t.value;return render()}
   if(adminChange(t))return;
+  if(notifyChange(t))return;
   if(t.id==="qhCat"){qz.filter.cat=t.value;return render()}
   if(t.id==="qhRes"){qz.filter.res=t.value;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}

@@ -416,3 +416,9 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 @keyframes ripple{from{transform:scale(.3);opacity:.9}to{transform:scale(2.6);opacity:0}}
 .bird{animation:birdfly 22s linear infinite}
 @keyframes birdfly{from{transform:translateX(-120px)}to{transform:translateX(420px)}}
+
+/* ---- notifications ---- */
+.bell{position:relative}
+.bell span{position:absolute;top:-4px;inset-inline-end:-4px;min-width:16px;height:16px;border-radius:8px;background:#e8455f;color:#fff;font:700 .62rem/16px var(--body);padding:0 3px}
+.bell span:empty{display:none}
+.note.unread{border-inline-start:3px solid var(--gold);padding-inline-start:8px}

@@ -113,4 +113,11 @@
   hs:{title:"Garden aur ghar",dayN:n=>`${n} mukammal din`,next:(s,d)=>`Agla: <b>${s}</b>, mazeed ${d} mukammal din baad`,allDone:"Sab kuch khul gaya. MashaAllah!",
     st:{grass:"Hari ghaas",flowers:"Pehle phool",beds:"Phoolon ki kyariyan aur gulab",fountain:"Darakht, pathar ki raah aur fawwara",house:"Aapka ghar",details:"Mehraab, khirkiyan aur bailen",interior:"Ghar ke andar: farnichar aur aaina",bench:"Bench aur parinde",bedroom:"Sone ka kamra",orchard:"Phaldar darakht"},
     note:"Har mukammal din gina jata hai, streak toot bhi jaye to bhi, is liye jo khul gaya woh kabhi nahi hatta. Yeh garden zaati hosla afzai hai, Jannat ki tasveer ya kisi ki ibadat ka paimana nahi.",gardenView:"Garden",houseView:"Ghar ke andar"},
+  nt:{title:"Yaad dihani",intro:"Ikhtiyari emails. Chunein kya aur kab chahiye. Kabhi bhi band kar sakti hain, aur har email mein band karne ka link hota hai.",
+    daily:"Rozana goals ki yaad dihani",dailyHelp:"Aap ke chune hue waqt par ek email, sirf tab jab aaj ke kuch goals baqi hon.",time:"Waqt",cats:{quran:"Quran ke goals",azkar:"Azkar",habits:"Rozana kaam",learning:"Seerat aur mutala"},
+    weekly:"Hafte ki progress report",weeklyHelp:"Pichle 7 din ki namaz, ayat, rozana kaam aur garden ki progress.",day:"Din",days:["Itwaar","Peer","Mangal","Budh","Jumeraat","Jumma","Hafta"],
+    inactive:"24 ghante baad halki si yaad dihani",inactiveHelp:"Agar ek din Deen Diary istemal na ho to sirf ek dafa bheji jati hai.",quiet:"Khamosh auqaat (koi email nahi)",
+    privacy:"Emails mein kabhi period ke din ya private journal ka zikr nahi hota.",tz:z=>`Waqt aap ke time zone (${z}) ke mutabiq hai.`,
+    center:"Notifications",today:"Aaj",allClear:"Aaj kuch baqi nahi. MashaAllah!",history:"Bheji gayi yaad dihaniyan",none:"Abhi koi yaad dihani nahi bheji gayi.",needAccount:"Yaad dihani ke liye email se sign in karein.",markRead:"Parh liya",
+    goalOpen:x=>`${x} aaj abhi baqi hai.`,quizReady:"Ilm ke safar mein aaj ka sawal tayyar hai."},
   bloomedOn:(n,d)=>`${n} · ${d}`};
