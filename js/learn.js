@@ -126,7 +126,7 @@ function prefsCard(wizard){const t=T(),g=G();
       ${sel(`data-litmin="${x.id}" aria-label="${t.dailyTime}"`,x.min,MINUTES,o=>t.mins(o))}<button class="x" data-litdel="${x.id}" aria-label="${t.remove}">×</button></div>`).join("")}
     ${sugg.length?`<div class="chips">${sugg.map(s=>`<button type="button" class="chip" data-litadd="${esc(s[S.lang]||s.en)}">+ ${esc(s[S.lang]||s.en)}</button>`).join("")}</div>`:""}
     <form class="topic add" id="litForm"><input type="text" id="litName" maxlength="60" placeholder="${t.addOwnTopic}" aria-label="${t.addOwnTopic}">
-      ${sel('id="litMin" aria-label="'+t.dailyTime+'"',15,MINUTES,o=>t.mins(o))}<button class="btn small primary">${t.add}</button></form>
+      ${sel('id="litMin" aria-label="'+t.dailyTime+'"',15,MINUTES,o=>t.mins(o))}<button class="btn small primary" id="litAddBtn" disabled>${t.add}</button></form>
     <div class="err" id="litErr" role="alert"></div>
     <h3 class="subh">${t.dhikr}</h3>
     <div class="pref flat"><label class="toggle"><input type="checkbox" data-goal="dhikr" ${g.dhikr.on?"checked":""}> <b>${t.dhikr}</b></label></div>
