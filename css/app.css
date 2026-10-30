@@ -1,25 +1,23 @@
-/* Layout: sage hero band with a muted-gold girih lattice; one calm column of cards; bottom tab bar on phones */
+/* Layout: emerald hero band with a gold girih star lattice, then one pocket-diary column of soft cards; bottom tab bar on phones */
 :root{
-  --bg:#f6f2e9; --card:#fffdf8; --ink:#25302a; --muted:#6d756c; --line:#e7e0d1;
-  --green:#5d7a63; --green-2:#2f4a3a; --green-soft:#e7eee3; --gold:#a8843f; --gold-2:#d4b46e; --gold-soft:#f4ead3;
-  --rose:#b0656f; --rose-soft:#f6e6e4; --bad:#a9573f; --bad-soft:#f5e3da;
-  --hero-1:#7f9a82; --hero-2:#4f6b55; --hero-3:#2f4a3a;
-  --shadow:0 1px 2px rgba(47,74,58,.05),0 10px 30px -16px rgba(47,74,58,.22);
+  --bg:#f1f4ee; --card:#ffffff; --ink:#17271f; --muted:#5f6e66; --line:#e1e7de;
+  --green:#17604a; --green-2:#0d3d30; --green-soft:#e1efe7; --gold:#b07d1a; --gold-2:#e2b553; --gold-soft:#f8eed8;
+  --rose:#b5476a; --rose-soft:#f8e4eb; --bad:#b2452f; --bad-soft:#f7e2dc;
+  --hero-1:#2a7a5f; --hero-2:#0f4535; --hero-3:#0a2b22;
+  --shadow:0 1px 2px rgba(23,39,31,.06),0 8px 24px -12px rgba(23,39,31,.18);
   --display:"Amiri", "Times New Roman", serif;
   --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --urdu:"Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#121a15; --card:#1a241e; --ink:#ebe6da; --muted:#a3ab9f; --line:#2b372f;
-  --green:#9cba9f; --green-2:#0f1a14; --green-soft:#223028; --gold:#d6b673; --gold-2:#e6cc92; --gold-soft:#2f2a1d;
-  --rose:#e0a0a8; --rose-soft:#3a2628; --bad:#e3a089; --bad-soft:#3a261e;
-  --hero-1:#3c5a45; --hero-2:#25392c; --hero-3:#131f18;
+  --bg:#0d1411; --card:#151f1a; --ink:#e7ede8; --muted:#9caaa2; --line:#25332c;
+  --green:#6cc59c; --green-2:#0a231b; --green-soft:#183027; --gold:#e6b95c; --gold-2:#f0cd7c; --gold-soft:#30271a;
+  --rose:#ec8eab; --rose-soft:#3a2129; --bad:#e8907a; --bad-soft:#3a221c;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#121a15; --card:#1a241e; --ink:#ebe6da; --muted:#a3ab9f; --line:#2b372f;
-  --green:#9cba9f; --green-2:#0f1a14; --green-soft:#223028; --gold:#d6b673; --gold-2:#e6cc92; --gold-soft:#2f2a1d;
-  --rose:#e0a0a8; --rose-soft:#3a2628; --bad:#e3a089; --bad-soft:#3a261e;
-  --hero-1:#3c5a45; --hero-2:#25392c; --hero-3:#131f18;
+  --bg:#0d1411; --card:#151f1a; --ink:#e7ede8; --muted:#9caaa2; --line:#25332c;
+  --green:#6cc59c; --green-2:#0a231b; --green-soft:#183027; --gold:#e6b95c; --gold-2:#f0cd7c; --gold-soft:#30271a;
+  --rose:#ec8eab; --rose-soft:#3a2129; --bad:#e8907a; --bad-soft:#3a221c;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 28px -14px rgba(0,0,0,.7); color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;padding-block:0 56px}
@@ -85,7 +83,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 .seg button.on.qaza{background:var(--gold);color:var(--card)}
 .seg button.on.missed{background:var(--bad);color:var(--card)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-select,input[type=text],input[type=number],input[type=date],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}
+select,input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-width:0}
 select{flex:1}
 .arabic{font-family:var(--display)}
 .goal{background:linear-gradient(135deg,var(--green-soft),var(--gold-soft));border-radius:14px;padding:12px 14px;font-size:.92rem}
@@ -214,7 +212,7 @@ textarea{width:100%;min-height:140px;font-family:ui-monospace,Menlo,monospace;fo
 .hero .top-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .lang{display:inline-flex;background:rgba(255,255,255,.1);border:1px solid rgba(226,181,83,.4);border-radius:999px;padding:3px}
 .lang button{border:0;background:none;color:rgba(244,239,226,.8);font:600 .75rem var(--body);padding:5px 11px;border-radius:999px;cursor:pointer}
-.lang button[aria-pressed="true"]{background:#e2c98f;color:#2f4a3a}
+.lang button[aria-pressed="true"]{background:#e2b553;color:#0d3d30}
 .greet{font-size:.95rem;color:#f4efe2;margin-top:6px}
 .reminder{background:linear-gradient(135deg,var(--green-2),var(--green));color:#f4efe2;border:0;position:relative;overflow:hidden}
 .reminder::after{content:"";position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:50%;border:1px dashed rgba(226,181,83,.5)}
@@ -261,7 +259,7 @@ textarea{width:100%;min-height:140px;font-family:ui-monospace,Menlo,monospace;fo
 /* ---- language & direction ---- */
 .lang button[lang="ur"]{font-family:var(--urdu);font-size:.8rem;line-height:1}
 [lang="ar"],.ayah{font-family:var(--display)}
-.reminder .ayah{font-size:1.5rem;line-height:1.9;color:#f3e6c4;text-align:right}
+.reminder .ayah{font-size:1.45rem;line-height:2;color:#f3e6c4;text-align:right}
 html[dir="rtl"] body{font-family:var(--urdu);line-height:2.05}
 html[dir="rtl"] h1,html[dir="rtl"] .bism{font-family:var(--display)}
 html[dir="rtl"] .card h2,html[dir="rtl"] nav button,html[dir="rtl"] .btn,html[dir="rtl"] .seg button{font-family:var(--urdu);line-height:1.9}
@@ -279,3 +277,16 @@ html[dir="rtl"] .reminder .q{font-family:var(--urdu);font-size:1.1rem;line-heigh
   .shell>.wrap{margin-top:-40px}
 }
 @media (max-width:640px){.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}nav button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+
+/* ---- email sign-in ---- */
+.pwrow{display:flex;gap:6px}
+.pwrow input{flex:1;min-width:0}
+.eye{border:1px solid var(--line);background:var(--bg);border-radius:12px;width:44px;cursor:pointer;font-size:1rem}
+.gender{border:1px solid var(--line);border-radius:12px;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px 16px;margin:4px 0 0}
+.gender legend{font-weight:600;font-size:.85rem;padding:0 4px}
+.gender label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.gender input{accent-color:var(--green);width:18px;height:18px}
+.check2{display:flex;gap:8px;align-items:flex-start;font-size:.85rem}
+.check2 input{accent-color:var(--green);width:18px;height:18px;flex:0 0 auto;margin-top:2px}
+.check2 a,.auth a{color:var(--green)}
+.btn:disabled{opacity:.6;cursor:wait}

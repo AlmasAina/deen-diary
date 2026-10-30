@@ -21,19 +21,13 @@ const SPECIES=[
   {id:"crystal",r:"l",shape:"pointy",np:8,c1:"#9ff0e6",c2:"#e8fffb",n:{roman:"Heera Kanwal",en:"Crystal Lotus",ur:"ہیرا کنول"}},
 ];
 const SPMAP=Object.fromEntries(SPECIES.map(s=>[s.id,s]));
-const REMINDERS=[
-  {ref:"94:6",ar:"إِنَّ مَعَ الْعُسْرِ يُسْرًا",ur:"بے شک مشکل کے ساتھ آسانی ہے۔",roman:"Beshak mushkil ke saath aasani hai.",en:"Indeed, with hardship comes ease."},
-  {ref:"2:152",ar:"فَاذْكُرُونِي أَذْكُرْكُمْ",ur:"تم مجھے یاد کرو، میں تمہیں یاد کروں گا۔",roman:"Tum Mujhe yaad karo, Main tumhein yaad karunga.",en:"So remember Me; I will remember you."},
-  {ref:"13:28",ar:"أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ",ur:"سن لو! اللہ کی یاد ہی سے دلوں کو اطمینان ملتا ہے۔",roman:"Khabardar! Allah ki yaad hi se dilon ko sukoon milta hai.",en:"Verily, in the remembrance of Allah do hearts find rest."},
-  {ref:"2:286",ar:"لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا",ur:"اللہ کسی جان پر اس کی طاقت سے زیادہ بوجھ نہیں ڈالتا۔",roman:"Allah kisi jaan par us ki taqat se zyada bojh nahi daalta.",en:"Allah does not burden a soul beyond what it can bear."},
-  {ref:"2:45",ar:"وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ",ur:"صبر اور نماز سے مدد حاصل کرو۔",roman:"Sabr aur namaz se madad hasil karo.",en:"Seek help through patience and prayer."},
-  {ref:"57:4",ar:"وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",ur:"اور وہ تمہارے ساتھ ہے جہاں کہیں بھی تم ہو۔",roman:"Aur woh tumhare saath hai jahan kahin bhi tum ho.",en:"And He is with you wherever you are."},
-  {ref:"65:3",ar:"وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ",ur:"اور جو اللہ پر بھروسہ کرے، اللہ اس کے لیے کافی ہے۔",roman:"Jo Allah par bharosa kare, Allah us ke liye kaafi hai.",en:"Whoever relies upon Allah, He is sufficient for him."},
-];
+/* Quran text: Tanzil (quran-simple). Translations: ur Fateh Muhammad Jalandhry, roman Abul A'la Maududi, en Sahih International. */
+const REMINDERS=[{"ref": "94:6", "ar": "إِنَّ مَعَ الْعُسْرِ يُسْرًا", "ur": "(اور) بے شک مشکل کے ساتھ آسانی ہے", "roman": "Beshak tangi kay saath farakhi bhi hai", "en": "Indeed, with hardship [will be] ease"}, {"ref": "2:152", "ar": "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ", "ur": "سو تم مجھے یاد کرو۔ میں تمہیں یاد کیا کروں گا۔ اور میرے احسان مانتے رہنا اور ناشکری نہ کرنا", "roman": "Lihaza tum mujhey yaad rakkho main tumhein yaad rakhunga aur mera shukar ada karo, kufran e niyamat na karo", "en": "So remember Me; I will remember you. And be grateful to Me and do not deny Me"}, {"ref": "13:28", "ar": "الَّذِينَ آمَنُوا وَتَطْمَئِنُّ قُلُوبُهُمْ بِذِكْرِ اللَّهِ ۗ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", "ur": "(یعنی) جو لوگ ایمان لاتے اور جن کے دل یادِ خدا سے آرام پاتے ہیں (ان کو) اور سن رکھو کہ خدا کی یاد سے دل آرام پاتے ہیں", "roman": "Aisey hi log hain woh jinhon ne (is Nabi ki dawat ko) maan liya hai aur unke dilon ko Allah ki yaad se itminaan naseeb hota hai, khabardar raho! Allah ki yaad hi woh cheez hai jissey dilon ko itminaan naseeb hua karta hai", "en": "Those who have believed and whose hearts are assured by the remembrance of Allah. Unquestionably, by the remembrance of Allah hearts are assured"}, {"ref": "2:45", "ar": "وَاسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ وَإِنَّهَا لَكَبِيرَةٌ إِلَّا عَلَى الْخَاشِعِينَ", "ur": "اور (رنج وتکلیف میں) صبر اور نماز سے مدد لیا کرو اور بے شک نماز گراں ہے، مگر ان لوگوں پر (گراں نہیں) جو عجز کرنے والے ہیں", "roman": "Sabar aur namaz se madad lo, beshak namaz ek sakht mushkil kaam hai", "en": "And seek help through patience and prayer, and indeed, it is difficult except for the humbly submissive [to Allah]"}, {"ref": "2:153", "ar": "يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا بِالصَّبْرِ وَالصَّلَاةِ ۚ إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "ur": "اے ایمان والو صبر اور نماز سے مدد لیا کرو بےشک خدا صبر کرنے والوں کے ساتھ ہے", "roman": "Aey logon jo iman laye ho sabr aur namaz se madad lo, Allah sabr karne walon ke saath hai", "en": "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient"}, {"ref": "20:14", "ar": "إِنَّنِي أَنَا اللَّهُ لَا إِلَٰهَ إِلَّا أَنَا فَاعْبُدْنِي وَأَقِمِ الصَّلَاةَ لِذِكْرِي", "ur": "بےشک میں ہی خدا ہوں۔ میرے سوا کوئی معبود نہیں تو میری عبادت کرو اور میری یاد کے لئے نماز پڑھا کرو", "roman": "Main hi Allah hoon, mere siwa koi khuda nahin hai, pas tu meri bandagi kar aur meri yaad ke liye namaz qayam kar", "en": "Indeed, I am Allah. There is no deity except Me, so worship Me and establish prayer for My remembrance"}, {"ref": "29:69", "ar": "وَالَّذِينَ جَاهَدُوا فِينَا لَنَهْدِيَنَّهُمْ سُبُلَنَا ۚ وَإِنَّ اللَّهَ لَمَعَ الْمُحْسِنِينَ", "ur": "اور جن لوگوں نے ہمارے لئے کوشش کی ہم اُن کو ضرور اپنے رستے دکھا دیں گے۔ اور خدا تو نیکو کاروں کے ساتھ ہے", "roman": "Jo log hamari khatir mujahida(strive) karenge unhein hum apne raaste dikhayenge, aur yaqeenan Allah neikukaron(who do good) hi ke saath hai", "en": "And those who strive for Us - We will surely guide them to Our ways. And indeed, Allah is with the doers of good"}];
+const TRANSLATOR={ur:"Fateh Muhammad Jalandhry",roman:"Maulana Maududi",en:"Sahih International"};
 
 /* ---- language ---- */
 const L=window.DD_I18N;
-const TABS=["today","calendar","garden","tasks","report","backup"];
+const TABS=["today","calendar","garden","tasks","report","profile"];
 
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -61,7 +55,17 @@ async function hashPin(name,pin){const txt="dd:"+name.trim().toLowerCase()+":"+p
   catch(e){let h=7;for(const c of txt)h=(h*31+c.charCodeAt(0))|0;return"s"+h}}
 function loadAccount(id){me=accounts.find(a=>a.id===id);let d=null;try{d=JSON.parse(ls.get(STORE+":"+id)||"null")}catch(e){}
   const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d)S.lang=lang;ls.set(SES,id)}
-function save(){if(me)ls.set(STORE+":"+me.id,JSON.stringify(S))}
+function save(){if(!me)return;if(sb){S._updated=Date.now();Cloud.queue(S)}else ls.set(STORE+":"+me.id,JSON.stringify(S))}
+/* first email sign-in on a phone that still has PIN-account data: carry that data over once */
+function legacyData(){if(ls.get("deen-diary-migrated"))return null;
+  const sid=ls.get(SES),id=sid&&accounts.some(a=>a.id===sid)?sid:accounts.length===1?accounts[0].id:null;
+  const raw=id?ls.get(STORE+":"+id):ls.get(STORE);if(!raw)return null;ls.set("deen-diary-migrated","1");try{return JSON.parse(raw)}catch(e){return null}}
+async function enterCloud(user){const m=user.user_metadata||{};Cloud.user=user;
+  me={id:user.id,email:user.email,name:m.full_name||user.email.split("@")[0],gender:m.gender||""};
+  document.getElementById("view").innerHTML=`<div class="card"><div class="muted" style="text-align:center">…</div></div>`;
+  let d=await Cloud.load();if(!d)d=legacyData();
+  const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d){S.lang=lang;S.periodOn=me.gender==="female"}
+  if(!S.gender)S.gender=me.gender;tab="today";sel=TODAY();save();render()}
 {const sid=ls.get(SES);if(sid&&accounts.some(a=>a.id===sid))loadAccount(sid)}
 const LANGS=["en","ur","roman"];
 const T=()=>L[S.lang]||L.en;
@@ -138,7 +142,7 @@ function streakRow(){const t=T();return`<div class="streaks">
   <div class="streak"><b>${streak(fullOK)}</b><span>${t.sFull}</span></div><div class="streak"><b>${streak(namazOK)}</b><span>${t.sNamaz}</span></div>
   <div class="streak"><b>${streak(tarOK)}</b><span>${t.sTar}</span></div><div class="streak"><b>${streak(tajOK)}</b><span>${t.sTaj}</span></div></div>`}
 function reminderCard(){const t=T(),i=Math.floor(parse(TODAY())/864e5)%REMINDERS.length,r=REMINDERS[(i+REMINDERS.length)%REMINDERS.length];
-  return`<div class="card reminder"><h2>${t.reminder}<small>${hijri(new Date())}</small></h2><div class="ayah" lang="ar" dir="rtl">${r.ar}</div><div class="q">“${r[S.lang]||r.en}”</div><div class="ref">QURAN ${r.ref}</div></div>`}
+  return`<div class="card reminder"><h2>${t.reminder}<small>${hijri(new Date())}</small></h2><div class="ayah" lang="ar" dir="rtl">${r.ar}</div><div class="q">“${r[S.lang]||r.en}”</div><div class="ref">QURAN ${r.ref} · ${TRANSLATOR[S.lang]||TRANSLATOR.en}</div></div>`}
 
 function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},note:""},can=editable(sel),dd=parse(sel),dis=can?"":" disabled";
   let chips="";for(let i=BACKFILL;i>=0;i--){const k=key(add(new Date(),-i)),x=parse(k);
@@ -285,16 +289,57 @@ function vReport(){const t=T(),days=[];for(let i=reportRange-1;i>=0;i--)days.pus
     <div class="barlabels">${days.map(k=>`<span>${reportRange===7||parse(k).getDate()%5===0?parse(k).getDate():""}</span>`).join("")}</div></div>
   <div class="card"><h2>${t.history}</h2>${hist?`<div class="tablewrap"><table><tr>${t.th.map(h=>`<th>${h}</th>`).join("")}</tr>${hist}</table></div>`:`<div class="muted">${t.noRecord}</div>`}</div>`}
 
-function vBackup(){const t=T();return`<div class="card"><h2>${t.profile}<small>${esc(me.name)}</small></h2>
-    <label class="toggle"><input type="checkbox" id="periodOn" ${S.periodOn?"checked":""}> <span><b>${t.periodTrack}</b><br><span class="muted">${t.periodTrackSub}</span></span></label>
-    <div class="row"><button class="btn" id="logout2">${t.logout}</button></div></div><div class="card"><h2>${t.bTitle}</h2><div class="muted">${t.bText}</div>
-    <textarea id="exp" readonly>${esc(JSON.stringify(S))}</textarea>
-    <div class="row"><button class="btn primary" id="copyExp">${t.copy}</button><button class="btn" id="dlExp">${t.dl}</button></div><div class="muted">${t.dlNote}</div></div>
-  <div class="card"><h2>${t.restore}</h2><div class="muted">${t.rText}</div><input type="file" id="impFile" accept=".json,application/json">
-    <textarea id="imp" placeholder='{"days":{...}}'></textarea><div class="row"><button class="btn" id="impGo">${t.rBtn}</button><span class="muted" id="impMsg"></span></div></div>
-  <div class="card"><h2>${t.reset}</h2><div class="row"><button class="btn danger" id="resetGo">${t.resetBtn}</button><span class="muted" id="resetMsg"></span></div></div>`}
+function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div class="card"><h2>${t.profile}</h2>
+    ${sb?`<form class="authform" id="nameForm"><label for="pName">${t.fullName}</label><div class="row"><input type="text" id="pName" value="${esc(me.name)}" maxlength="60" style="flex:1"><button class="btn small">${t.save}</button></div></form>
+    <div class="muted">${t.email}: <b>${esc(me.email)}</b></div>`:`<div class="muted">${t.name}: <b>${esc(me.name)}</b></div>`}
+    <div class="row"><span class="muted" style="flex:1">${t.cloudNote(!!sb)}</span></div></div>
+  ${fem||S.periodOn?`<div class="card"><label class="toggle"><input type="checkbox" id="periodOn" ${S.periodOn?"checked":""}> <span><b>${t.periodTrack}</b><br><span class="muted">${t.periodPrivate}</span></span></label></div>`:""}
+  ${sb?`<div class="card"><h2>${t.changePw}</h2><form class="authform" id="pwForm">
+      <label for="pPw">${t.newPw}</label><input type="password" id="pPw" autocomplete="new-password" minlength="8" required>
+      <label for="pPw2">${t.confirmPw}</label><input type="password" id="pPw2" autocomplete="new-password" minlength="8" required>
+      <div class="err" id="pErr" role="alert"></div><button class="btn">${t.changePw}</button></form></div>`:""}
+  <div class="card"><div class="row"><button class="btn" id="logout2">${t.logout}</button></div></div>
+  ${sb?`<div class="card"><h2>${t.delAcc}</h2><div class="muted">${t.delAccSub}</div><div class="row"><button class="btn danger" id="delAcc">${t.delAcc}</button><span class="muted" id="delMsg"></span></div></div>`:""}`}
 
-function vAuth(){const t=T(),up=authMode==="up";
+function pwIssue(pw,t){return pw.length<8||!/[A-Za-z]/.test(pw)||!/\d/.test(pw)?t.pwWeak:""}
+function vAuthEmail(){const t=T(),m=authMode;
+  const pw=(id,lbl,ac)=>`<label for="${id}">${lbl}</label><div class="pwrow"><input type="password" id="${id}" autocomplete="${ac}" required><button type="button" class="eye" data-eye="${id}" aria-label="${t.showPw}">👁</button></div>`;
+  const title={in:t.signIn,up:t.newAcc,forgot:t.forgotTitle,reset:t.newPw,sent:t.checkEmail}[m];
+  let body="";
+  if(m==="sent")body=`<div class="goal" style="text-align:center">${t.sentMsg}</div><button type="button" class="btn primary" data-mode="in">${t.signIn}</button>`;
+  else body=`<form id="auth-${m}" class="authform">
+    ${m==="up"?`<label for="aFull">${t.fullName}</label><input type="text" id="aFull" autocomplete="name" maxlength="60" required>`:""}
+    ${m!=="reset"?`<label for="aEmail">${t.email}</label><input type="email" id="aEmail" autocomplete="email" required>`:""}
+    ${m==="in"?pw("aPw",t.password,"current-password"):""}
+    ${m==="up"||m==="reset"?pw("aPw",t.password,"new-password")+pw("aPw2",t.confirmPw,"new-password")+`<div class="muted" style="font-size:.78rem">${t.pwRule}</div>`:""}
+    ${m==="up"?`<fieldset class="gender"><legend>${t.gender}</legend>${[["female",t.female],["male",t.male],["none",t.preferNot]].map(([v,l])=>`<label><input type="radio" name="gender" value="${v}" required> ${l}</label>`).join("")}</fieldset>
+      <label class="check2"><input type="checkbox" id="aTerms" required> <span>${t.terms}</span></label>`:""}
+    <div class="err" id="aErr" role="alert"></div>
+    <button class="btn primary">${{in:t.signIn,up:t.create,forgot:t.sendLink,reset:t.savePw}[m]}</button></form>
+    ${m==="in"?`<button type="button" class="linkbtn" data-mode="forgot">${t.forgotLink}</button><button type="button" class="linkbtn" data-mode="up">${t.noAcc}</button>`:""}
+    ${m==="up"||m==="forgot"?`<button type="button" class="linkbtn" data-mode="in">${t.haveAcc}</button>`:""}`;
+  return`<div class="card auth"><div class="authicon">🌸</div><h2 style="justify-content:center">${title}</h2>${body}</div>`}
+async function doAuthEmail(form){const t=T(),v=id=>{const e=document.getElementById(id);return e?e.value.trim():""},err=document.getElementById("aErr"),btn=document.querySelector("#"+form+" .btn.primary");
+  const fail=msg=>{err.textContent=msg;btn.disabled=false};btn.disabled=true;err.textContent="";
+  const redirect=location.origin+location.pathname;
+  try{
+    if(form==="auth-up"){const pw=document.getElementById("aPw").value,g=(document.querySelector("input[name=gender]:checked")||{}).value;
+      if(!v("aFull"))return fail(t.nameBad);if(!g)return fail(t.genderBad);const w=pwIssue(pw,t);if(w)return fail(w);
+      if(pw!==document.getElementById("aPw2").value)return fail(t.pwMismatch);
+      const{data,error}=await sb.auth.signUp({email:v("aEmail"),password:pw,options:{data:{full_name:v("aFull"),gender:g},emailRedirectTo:redirect}});
+      if(error)return fail(authMsg(error,t));if(!data.session){authMode="sent";return render()}return}
+    if(form==="auth-in"){const{error}=await sb.auth.signInWithPassword({email:v("aEmail"),password:document.getElementById("aPw").value});
+      if(error)return fail(authMsg(error,t));return}
+    if(form==="auth-forgot"){const{error}=await sb.auth.resetPasswordForEmail(v("aEmail"),{redirectTo:redirect});if(error)return fail(authMsg(error,t));
+      authMode="sent";return render()}
+    if(form==="auth-reset"){const pw=document.getElementById("aPw").value,w=pwIssue(pw,t);if(w)return fail(w);if(pw!==document.getElementById("aPw2").value)return fail(t.pwMismatch);
+      const{data,error}=await sb.auth.updateUser({password:pw});if(error)return fail(authMsg(error,t));toast(t.pwSaved);authMode="in";return enterCloud(data.user)}
+  }catch(e){fail(navigator.onLine?t.authErr:t.offline)}}
+function authMsg(e,t){const m=(e.message||"").toLowerCase();
+  if(m.includes("invalid login"))return t.wrongEmail;if(m.includes("not confirmed"))return t.notConfirmed;
+  if(m.includes("already registered"))return t.emailTaken;if(m.includes("rate")||e.status===429)return t.tooMany;
+  if(m.includes("valid email")||m.includes("invalid format"))return t.emailBad;return e.message||t.authErr}
+function vAuth(){if(sb)return vAuthEmail();const t=T(),up=authMode==="up";
   return`<div class="card auth"><div class="authicon">🌸</div><h2 style="justify-content:center">${up?t.newAcc:t.signIn}</h2>
     <div class="muted" style="text-align:center">${t.authNote}</div>
     ${!up&&accounts.length?`<div class="acctlist">${accounts.map(a=>`<button type="button" class="acct" data-acct="${esc(a.name)}"><span>${esc(a.name[0]||"?").toUpperCase()}</span>${esc(a.name)}</button>`).join("")}</div>`:""}
@@ -318,7 +363,7 @@ async function doAuth(form){const t=T(),name=document.getElementById("aName").va
     if(!legacy)S.periodOn=document.getElementById("aPeriod").checked;save();tab="today";sel=TODAY();toast(t.welcome(name));return render()}
   if(!found||found.pin!==await hashPin(name,pin))return err.textContent=t.wrong;
   loadAccount(found.id);tab="today";sel=TODAY();toast(t.welcome(found.name));render()}
-function logout(){save();ls.del(SES);me=null;authMode="in";render()}
+function logout(){if(sb){Cloud.push(S).finally(()=>sb.auth.signOut());Cloud.user=null;me=null;S.days={};authMode="in";return render()}save();ls.del(SES);me=null;authMode="in";render()}
 function render(){const t=T(),hr=new Date().getHours();
   document.documentElement.lang={en:"en",ur:"ur",roman:"ur-Latn"}[S.lang]||"en";document.documentElement.dir=t.dir||"ltr";
   document.getElementById("logout").hidden=!me;document.getElementById("logout").title=t.logout;document.getElementById("logout").setAttribute("aria-label",t.logout);
@@ -336,7 +381,7 @@ function render(){const t=T(),hr=new Date().getHours();
   const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const g=prayed(td)+(td.tarjuma?1:0)+(td.tajweed?1:0)+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(7+S.routine.length)*100)}
   document.getElementById("ringVal").style.strokeDashoffset=226.2*(1-pct/100);document.getElementById("ringPct").textContent=pct+"%";
   const v=document.getElementById("view");v.style.animation="none";void v.offsetWidth;v.style.animation="";
-  v.innerHTML={today:vToday,calendar:vCalendar,garden:vGarden,tasks:vTasks,report:vReport,backup:vBackup}[tab]()}
+  v.innerHTML={today:vToday,calendar:vCalendar,garden:vGarden,tasks:vTasks,report:vReport,profile:vProfile}[tab]()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");
@@ -347,7 +392,12 @@ document.getElementById("logout").onclick=logout;
 view.addEventListener("click",e=>{
   if(e.target.id==="authSwitch"){authMode=authMode==="up"?"in":"up";return render()}
   const ac=e.target.closest("[data-acct]");if(ac){document.getElementById("aName").value=ac.dataset.acct;return document.getElementById("aPin").focus()}
-  if(e.target.id==="logout2")return logout();const t=e.target.closest("button,a,input[type=checkbox],[data-bud],[data-fl]");if(!t)return;const tr=T();
+  if(e.target.id==="logout2")return logout();
+  const md=e.target.closest("[data-mode]");if(md){authMode=md.dataset.mode;return render()}
+  const eye=e.target.closest("[data-eye]");if(eye){const f=document.getElementById(eye.dataset.eye);f.type=f.type==="password"?"text":"password";return}
+  if(e.target.id==="delAcc"){const b=e.target,t=T();if(!b.dataset.armed){b.dataset.armed="1";b.textContent=t.sure;document.getElementById("delMsg").textContent=t.delWarn;return}
+    b.disabled=true;sb.rpc("delete_my_account").then(({error})=>{if(error){b.disabled=false;document.getElementById("delMsg").textContent=t.authErr;return}
+      try{localStorage.removeItem(Cloud.key());localStorage.removeItem(Cloud.key()+":dirty")}catch(_){}sb.auth.signOut();Cloud.user=null;me=null;authMode="in";toast(t.deleted);render()});return}const t=e.target.closest("button,a,input[type=checkbox],[data-bud],[data-fl]");if(!t)return;const tr=T();
   if(t.dataset.bud)return openBud(t.dataset.bud);
   if(t.dataset.fl){const f=S.flowers[t.dataset.fl],sp=f&&SPMAP[f.sp];return toast(tr.bloomedOn(sp?(sp.n[S.lang]||sp.n.en):"🌻",parse(t.dataset.fl).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})))}
   if(t.dataset.goto){e.preventDefault();tab=t.dataset.goto;return render()}
@@ -362,15 +412,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.deltodo){S.todos=S.todos.filter(r=>r.id!==t.dataset.deltodo);return commit()}
   if(t.dataset.range){reportRange=+t.dataset.range;return render()}
   if(t.id==="calPrev"){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()-1,1);return render()}
-  if(t.id==="calNext"){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);return render()}
-  if(t.id==="copyExp"){const ta=document.getElementById("exp");navigator.clipboard.writeText(ta.value).then(()=>toast(tr.copied),()=>{ta.select();toast(tr.selected)});return}
-  if(t.id==="dlExp"){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:"application/json"}));a.download=`deen-diary-${TODAY()}.json`;a.click();return}
-  if(t.id==="impGo"){const msg=document.getElementById("impMsg");
-    try{const o=JSON.parse(document.getElementById("imp").value);if(!o.days)throw 0;
-      if(t.dataset.armed){S=Object.assign(fresh(),o,{lang:S.lang});save();toast(tr.restored);return render()}
-      t.dataset.armed="1";t.textContent=tr.sure;msg.textContent=tr.foundDays(Object.keys(o.days).length)}catch(_){msg.textContent=tr.badJson}return}
-  if(t.id==="resetGo"){if(t.dataset.armed){const lang=S.lang,po=S.periodOn;S=fresh();S.lang=lang;S.periodOn=po;save();toast(tr.wiped);return render()}
-    t.dataset.armed="1";t.textContent=tr.sure;document.getElementById("resetMsg").textContent=tr.backupFirst;return}});
+  if(t.id==="calNext"){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+1,1);return render()}});
 view.addEventListener("change",e=>{const t=e.target;
   if(t.id==="period"){dayOf(sel).period=t.checked;return commit()}
   if(t.id==="periodOn"){S.periodOn=t.checked;return commit()}
@@ -378,13 +420,26 @@ view.addEventListener("change",e=>{const t=e.target;
   if(t.id==="tarAyah"){const s=S.tarjumaPos.surah;S.tarjumaPos.ayah=Math.max(1,Math.min(AYAT[s-1],+t.value||1));return commit()}
   if(t.id==="tajSurah"){S.tajweedPos={surah:+t.value,ruku:1};return commit()}
   if(t.id==="tajRuku"){S.tajweedPos.ruku=Math.max(1,+t.value||1);return commit()}
-  if(t.id==="note"){dayOf(sel).note=t.value;save()}
-  if(t.id==="impFile"&&t.files[0]){const r=new FileReader();r.onload=()=>document.getElementById("imp").value=r.result;r.readAsText(t.files[0])}});
+  if(t.id==="note"){dayOf(sel).note=t.value;save()}});
 view.addEventListener("keydown",e=>{const b=e.target.closest&&e.target.closest("[data-bud]");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openBud(b.dataset.bud)}});
 view.addEventListener("submit",e=>{e.preventDefault();
   if(e.target.id==="signin"||e.target.id==="signup")return doAuth(e.target.id);
+  if(e.target.id.startsWith("auth-"))return doAuthEmail(e.target.id);
+  if(e.target.id==="nameForm"){const n=document.getElementById("pName").value.trim();if(!n)return;
+    sb.auth.updateUser({data:{full_name:n}}).then(({error})=>{if(error)return toast(T().authErr);me.name=n;toast(T().saved);render()});return}
+  if(e.target.id==="pwForm"){const t=T(),pw=document.getElementById("pPw").value,er=document.getElementById("pErr"),w=pwIssue(pw,t);if(w)return er.textContent=w;
+    if(pw!==document.getElementById("pPw2").value)return er.textContent=t.pwMismatch;
+    sb.auth.updateUser({password:pw}).then(({error})=>{if(error)return er.textContent=authMsg(error,t);e.target.reset();er.textContent="";toast(t.pwSaved)});return}
   if(e.target.id==="rtForm"){const v=document.getElementById("rtName").value.trim();if(v){S.routine.push({id:uid(),name:v});commit()}}
   if(e.target.id==="todoForm"){const v=document.getElementById("todoText").value.trim();if(v){S.todos.push({id:uid(),text:v,due:document.getElementById("todoDue").value,done:false});commit()}}});
 const h=location.hash.slice(1);if(TABS.includes(h))tab=h;
+if(sb){
+  sb.auth.onAuthStateChange((ev,session)=>{
+    if(ev==="PASSWORD_RECOVERY"){authMode="reset";me=null;return render()}
+    if(session&&session.user&&(!me||me.id!==session.user.id)&&authMode!=="reset")enterCloud(session.user);
+    if(ev==="SIGNED_OUT"&&me){me=null;render()}});
+  addEventListener("online",()=>{if(me&&Cloud.isDirty())Cloud.push(S)});
+  me=null;authMode="in";
+}
 render();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
