@@ -1,19 +1,20 @@
 /* Reminder preferences (stored in notification_prefs so the server can read them) and the in-app notification center.
    Loaded before app.js; uses its globals only when called. */
 let NP=null,NLOG=[],npMsg="";
-const NP_DEFAULT=()=>({email_on:false,daily_hour:20,tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"),cats:{quran:true,azkar:true,habits:true,learning:true},weekly:false,weekly_day:5,inactivity:false,quiet_from:22,quiet_to:6});
+const NP_DEFAULT=()=>({email_on:false,daily_hour:20,tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"),cats:{quran:true,azkar:true,habits:true,learning:true},weekly:false,weekly_day:5,inactivity:false,quiet_from:22,quiet_to:6,push_on:true});
 async function loadNotify(){if(!sb||!me)return;
   try{const{data}=await sb.from("notification_prefs").select("*").eq("user_id",me.id).maybeSingle();NP=Object.assign(NP_DEFAULT(),data||{})}catch(e){NP=NP_DEFAULT()}
   try{const{data}=await sb.from("notification_log").select("id,kind,day,title,body,read,sent_at").order("sent_at",{ascending:false}).limit(60);NLOG=data||[]}catch(e){NLOG=[]}
   updateBell()}
 async function saveNotify(){if(!sb||!me||!NP)return;const t=T();NP.tz=Intl.DateTimeFormat().resolvedOptions().timeZone||NP.tz;
-  const row={user_id:me.id,email_on:!!NP.email_on,daily_hour:+NP.daily_hour,tz:NP.tz,cats:NP.cats,weekly:!!NP.weekly,weekly_day:+NP.weekly_day,inactivity:!!NP.inactivity,quiet_from:+NP.quiet_from,quiet_to:+NP.quiet_to,updated_at:new Date().toISOString()};
+  const row={user_id:me.id,email_on:!!NP.email_on,daily_hour:+NP.daily_hour,tz:NP.tz,cats:NP.cats,weekly:!!NP.weekly,weekly_day:+NP.weekly_day,inactivity:!!NP.inactivity,quiet_from:+NP.quiet_from,quiet_to:+NP.quiet_to,push_on:NP.push_on!==false,updated_at:new Date().toISOString()};
   const{error}=await sb.from("notification_prefs").upsert(row);npMsg=error?(navigator.onLine?t.authErr:t.offline):t.saved;if(tab==="profile")render()}
 const hourLbl=h=>`${(h%12)||12}:00 ${h<12?"AM":"PM"}`;
 function notifyCard(){const t=T(),n=t.nt;if(!sb)return"";if(!NP)return`<div class="card"><h2>${n.title}</h2><div class="muted">${t.adm.loading}</div></div>`;
   const hours=[...Array(24).keys()],days=[0,1,2,3,4,5,6];
   const ck=(id,on,l,help)=>`<label class="toggle"><input type="checkbox" id="${id}" ${on?"checked":""}> <span><b>${l}</b>${help?`<br><span class="muted">${help}</span>`:""}</span></label>`;
   return`<div class="card"><h2>${n.title}<small>✉️ ${esc(me.email)}</small></h2><div class="muted small">${n.intro}</div>
+    ${isNative()?ck("npPush",NP.push_on!==false,n.push,n.pushHelp):""}
     ${ck("npEmail",NP.email_on,n.daily,n.dailyHelp)}
     ${NP.email_on?`<div class="field"><label for="npHour">${n.time}</label><select id="npHour">${hours.map(h=>`<option value="${h}"${+NP.daily_hour===h?" selected":""}>${hourLbl(h)}</option>`).join("")}</select></div>
       <div class="chips">${["quran","azkar","habits","learning"].map(c=>`<label class="chip jtype"><input type="checkbox" data-npcat="${c}" ${NP.cats[c]!==false?"checked":""}> ${n.cats[c]}</label>`).join("")}</div>`:""}
@@ -23,7 +24,7 @@ function notifyCard(){const t=T(),n=t.nt;if(!sb)return"";if(!NP)return`<div clas
     <div class="field"><label>${n.quiet}</label><select id="npQf">${hours.map(h=>`<option value="${h}"${+NP.quiet_from===h?" selected":""}>${hourLbl(h)}</option>`).join("")}</select><span class="muted">–</span><select id="npQt">${hours.map(h=>`<option value="${h}"${+NP.quiet_to===h?" selected":""}>${hourLbl(h)}</option>`).join("")}</select></div>
     <div class="muted small">${n.privacy} ${n.tz(esc(NP.tz))}</div>${npMsg?`<div class="muted small">✓ ${npMsg}</div>`:""}</div>`}
 function notifyChange(el){if(!NP)return false;const id=el.id;
-  if(id==="npEmail")NP.email_on=el.checked;else if(id==="npHour")NP.daily_hour=+el.value;else if(id==="npWeekly")NP.weekly=el.checked;else if(id==="npDay")NP.weekly_day=+el.value;
+  if(id==="npPush")NP.push_on=el.checked;else if(id==="npEmail")NP.email_on=el.checked;else if(id==="npHour")NP.daily_hour=+el.value;else if(id==="npWeekly")NP.weekly=el.checked;else if(id==="npDay")NP.weekly_day=+el.value;
   else if(id==="npInactive")NP.inactivity=el.checked;else if(id==="npQf")NP.quiet_from=+el.value;else if(id==="npQt")NP.quiet_to=+el.value;
   else if(el.dataset.npcat)NP.cats={...NP.cats,[el.dataset.npcat]:el.checked};else return false;
   npMsg="";saveNotify();render();return true}

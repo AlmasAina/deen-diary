@@ -37,3 +37,12 @@ function phoneCard(){const t=T(),h=t.ph,r=PR(),hours=[...Array(24).keys()];
 function phoneChange(el){const r=PR(),id=el.id;
   if(id==="phGoal")r.goal=el.checked;else if(id==="phGoalHour")r.goalHour=+el.value;else if(id==="phSalawat")r.salawat=el.checked;else if(id==="phSalawatN")r.salawatPerDay=+el.value;else return false;
   save();queueLocalSchedule();render();return true}
+
+/* server push (Firebase Cloud Messaging): register this phone and save its token to the user's account */
+let pushDone=false;
+async function registerPush(){const P=isNative()&&window.Capacitor.Plugins&&window.Capacitor.Plugins.PushNotifications;if(!P||!sb||!me||pushDone)return;pushDone=true;
+  try{let perm=await P.checkPermissions();if(perm.receive!=="granted")perm=await P.requestPermissions();if(perm.receive!=="granted")return;
+    await P.addListener("registration",async tok=>{try{await sb.from("device_tokens").upsert({token:tok.value,user_id:me.id,platform:"android",updated_at:new Date().toISOString()});
+      await sb.from("notification_prefs").upsert({user_id:me.id,tz:Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"},{onConflict:"user_id",ignoreDuplicates:true})}catch(e){}});
+    await P.addListener("pushNotificationActionPerformed",()=>{tab="notes";render()});
+    await P.register()}catch(e){pushDone=false}}

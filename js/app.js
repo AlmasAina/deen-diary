@@ -68,7 +68,7 @@ async function enterCloud(user){const m=user.user_metadata||{};Cloud.user=user;
   document.getElementById("view").innerHTML=`<div class="card"><div class="muted" style="text-align:center">…</div></div>`;
   let d=await Cloud.load();if(!d)d=legacyData();
   const lang=S.lang;S=Object.assign(fresh(),d||{});if(!d){S.lang=lang;S.periodOn=me.gender==="female"}
-  loadNotify().then(()=>{if(tab==="profile"||tab==="notes")render()});checkAdmin().then(()=>{if(tab==="profile")render()});loadDbQuestions().then(()=>{if(tab==="quiz"||tab==="today")render()});if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
+  loadNotify().then(()=>{if(tab==="profile"||tab==="notes")render()});registerPush();checkAdmin().then(()=>{if(tab==="profile")render()});loadDbQuestions().then(()=>{if(tab==="quiz"||tab==="today")render()});if(!S.gender)S.gender=me.gender;if(d&&Object.keys(S.days).length&&S.onboarded===undefined){S.onboarded=S.toured=true}tab="today";sel=TODAY();save();render()}
 {const sid=ls.get(SES);if(sid&&accounts.some(a=>a.id===sid))loadAccount(sid)}
 const LANGS=["en","ur","roman"];
 const T=()=>L[S.lang]||L.en;

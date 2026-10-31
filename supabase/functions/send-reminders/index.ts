@@ -12,6 +12,8 @@ const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
 const FROM = Deno.env.get("MAIL_FROM") ?? "Deen Diary <onboarding@resend.dev>";
 const SITE = "https://almasaina.github.io/deen-diary/";
 const FN_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-reminders`;
+// Firebase service account JSON (Project settings > Service accounts > Generate new private key), stored as a secret
+const FCM_SA = (() => { try { return JSON.parse(Deno.env.get("FCM_SERVICE_ACCOUNT") ?? ""); } catch { return null; } })();
 
 type Lang = "en" | "roman" | "ur";
 const TXT = {
@@ -91,16 +93,47 @@ function page(lang: Lang, title: string, body: string, token: string) {
   <p><a href="${SITE}" style="display:inline-block;background:#17604a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:10px">${t.open}</a></p></div>
   <p style="font-size:12px;color:#5f6e66;text-align:center"><a href="${FN_URL}?unsubscribe=${token}" style="color:#5f6e66">${t.unsub}</a></p></div></body></html>`;
 }
+// ---- Firebase Cloud Messaging (HTTP v1) ----
+let fcmCache: { token: string; exp: number } | null = null;
+const b64url = (b: ArrayBuffer | string) => btoa(typeof b === "string" ? b : String.fromCharCode(...new Uint8Array(b))).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
+async function fcmAccessToken() {
+  if (fcmCache && fcmCache.exp > Date.now() + 60e3) return fcmCache.token;
+  const now = Math.floor(Date.now() / 1000);
+  const head = b64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  const claim = b64url(JSON.stringify({ iss: FCM_SA.client_email, scope: "https://www.googleapis.com/auth/firebase.messaging", aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600 }));
+  const pem = FCM_SA.private_key.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const key = await crypto.subtle.importKey("pkcs8", Uint8Array.from(atob(pem), (c) => c.charCodeAt(0)), { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(`${head}.${claim}`));
+  const r = await fetch("https://oauth2.googleapis.com/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${head}.${claim}.${b64url(sig)}` });
+  const j = await r.json(); if (!j.access_token) throw new Error("FCM auth failed");
+  fcmCache = { token: j.access_token, exp: Date.now() + (j.expires_in ?? 3600) * 1000 }; return fcmCache.token;
+}
+async function pushTo(user_id: string, title: string, body: string) {
+  if (!FCM_SA) return 0;
+  const { data: toks } = await db.from("device_tokens").select("token").eq("user_id", user_id);
+  if (!toks?.length) return 0;
+  const access = await fcmAccessToken(); let n = 0;
+  for (const { token } of toks) {
+    const r = await fetch(`https://fcm.googleapis.com/v1/projects/${FCM_SA.project_id}/messages:send`, { method: "POST",
+      headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ message: { token, notification: { title: "Deen Diary", body: `${title}${body ? " — " + body : ""}`.slice(0, 240) } } }) });
+    if (r.ok) n++; else if (r.status === 404 || r.status === 400) await db.from("device_tokens").delete().eq("token", token); // app removed or token expired
+  }
+  return n;
+}
+
 async function send(to: string, subject: string, html: string) {
   if (!RESEND) throw new Error("RESEND_API_KEY is not set");
   const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" }, body: JSON.stringify({ from: FROM, to, subject, html }) });
   if (!r.ok) throw new Error(`Resend ${r.status}: ${await r.text()}`);
 }
 // claim the (user, kind, day) slot first so two runs can never send the same email twice; release it if sending fails
-async function sendOnce(user_id: string, kind: string, day: string, title: string, body: string, to: string, html: string) {
-  const { error } = await db.from("notification_log").insert({ user_id, kind, day, title, body });
+async function sendOnce(user_id: string, kind: string, day: string, title: string, body: string, to: string, html: string, ch: { email: boolean; push: boolean }) {
+  if (!ch.email && !ch.push) return 0;
+  const { error } = await db.from("notification_log").insert({ user_id, kind, day, title, body, channel: [ch.email && "email", ch.push && "push"].filter(Boolean).join("+") });
   if (error) return 0;
-  try { await send(to, title, html); return 1; }
+  try { let n = 0; if (ch.push) n += await pushTo(user_id, title, body); if (ch.email) { await send(to, title, html); n++; } return n ? 1 : 0; }
   catch (e) { await db.from("notification_log").delete().match({ user_id, kind, day }); throw e; }
 }
 
@@ -112,7 +145,7 @@ Deno.serve(async (req) => {
   }
   if (req.headers.get("Authorization") !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) return new Response("forbidden", { status: 403 });
 
-  const { data: prefs } = await db.from("notification_prefs").select("*").or("email_on.eq.true,weekly.eq.true,inactivity.eq.true");
+  const { data: prefs } = await db.from("notification_prefs").select("*").or("email_on.eq.true,weekly.eq.true,inactivity.eq.true,push_on.eq.true");
   let sent = 0; const errors: string[] = [];
   for (const p of prefs ?? []) {
     try {
@@ -123,21 +156,22 @@ Deno.serve(async (req) => {
       const now = local(p.tz || "Asia/Karachi");
       if (inQuiet(now.hour, p.quiet_from, p.quiet_to)) continue;
 
-      if (p.email_on && now.hour === p.daily_hour) {
+      const push = p.push_on !== false && !!FCM_SA;
+      if ((p.email_on || push) && now.hour === p.daily_hour) {
         const items = openItems(data, now.date, p.cats ?? {});
         if (items.length) {
           const list = items.map((i) => `<li>${(t.items as any)[i]}</li>`).join("");
           sent += await sendOnce(p.user_id, "daily", now.date, t.dailyTitle, items.map((i) => (t.items as any)[i]).join(", "), user.email,
-            page(lang, t.dailyTitle, `<p>${t.dailyIntro}</p><ul>${list}</ul>`, p.unsub_token));
+            page(lang, t.dailyTitle, `<p>${t.dailyIntro}</p><ul>${list}</ul>`, p.unsub_token), { email: p.email_on, push });
         }
       }
       if (p.weekly && now.weekday === p.weekly_day && now.hour === p.daily_hour) {
         const [pr, ay, h, f] = weekStats(data, now.date), body = t.week(pr, ay, h, f);
-        sent += await sendOnce(p.user_id, "weekly", now.date, t.weeklyTitle, body.replace(/<br>/g, " · "), user.email, page(lang, t.weeklyTitle, `<p>${body}</p>`, p.unsub_token));
+        sent += await sendOnce(p.user_id, "weekly", now.date, t.weeklyTitle, body.replace(/<br>/g, " · "), user.email, page(lang, t.weeklyTitle, `<p>${body}</p>`, p.unsub_token), { email: true, push });
       }
       if (p.inactivity && row?.updated_at && Date.now() - new Date(row.updated_at).getTime() > 24 * 3600e3) {
         const since = row.updated_at.slice(0, 10); // at most one note per period of inactivity
-        sent += await sendOnce(p.user_id, "inactive", since, t.inactiveTitle, t.inactiveBody, user.email, page(lang, t.inactiveTitle, `<p>${t.inactiveBody}</p>`, p.unsub_token));
+        sent += await sendOnce(p.user_id, "inactive", since, t.inactiveTitle, t.inactiveBody, user.email, page(lang, t.inactiveTitle, `<p>${t.inactiveBody}</p>`, p.unsub_token), { email: true, push });
       }
     } catch (e) { errors.push(String(e)); }
   }
