@@ -26,11 +26,14 @@ function prayerTimes(date,lat,lng,method,asrFactor){const y=date.getFullYear(),m
 const fmtH=h=>{if(!isFinite(h))return"–";const mins=Math.round(fixH(h)*60)%1440,H=Math.floor(mins/60),Mi=mins%60;return`${(H%12)||12}:${String(Mi).padStart(2,"0")} ${H<12?"AM":"PM"}`};
 /* Asr begins when an object's shadow equals its length (the common standard); no school is named in the app */
 const ASR_SHADOW=1;
+/* the calculation method is chosen from the location, so users never have to pick one */
+function autoMethod(lat,lng){if(lng>=60&&lng<=98&&lat>=5&&lat<=40)return"karachi";if(lat>=15&&lat<=33&&lng>=34&&lng<=56)return"makkah";
+  if(lng<=-50)return"isna";if(lat<=37&&lat>=-35&&lng>=-20&&lng<34)return"egypt";return"mwl"}
 const PS=()=>S.prayerSet||(S.prayerSet={method:"karachi",city:"",lat:null,lng:null,notify:false});
-function todayTimes(k){const p=PS();if(p.lat==null)return null;return prayerTimes(parse(k||TODAY()),p.lat,p.lng,p.method,ASR_SHADOW)}
+function todayTimes(k){const p=PS();if(p.lat==null)return null;return prayerTimes(parse(k||TODAY()),p.lat,p.lng,autoMethod(p.lat,p.lng),ASR_SHADOW)}
 function nextPrayer(){const tt=todayTimes();if(!tt)return null;const now=new Date(),h=now.getHours()+now.getMinutes()/60+now.getSeconds()/3600;
   for(const[p]of PRAYERS)if(tt[p]>h)return{p,at:tt[p],inMin:Math.round((tt[p]-h)*60)};
-  const tm=prayerTimes(add(new Date(),1),PS().lat,PS().lng,PS().method,ASR_SHADOW);return{p:"fajr",at:tm.fajr,inMin:Math.round((24-h+tm.fajr)*60)}}
+  const tm=prayerTimes(add(new Date(),1),PS().lat,PS().lng,autoMethod(PS().lat,PS().lng),ASR_SHADOW);return{p:"fajr",at:tm.fajr,inMin:Math.round((24-h+tm.fajr)*60)}}
 
 function timesCard(){const t=T(),p=PS(),tt=todayTimes();
   if(!tt)return`<div class="card empty"><b>${t.ptTitle}</b><div class="muted">${t.ptSetup}</div><button class="btn primary" data-goto="profile">${t.ptChoose}</button></div>`;
@@ -43,7 +46,6 @@ function prayerSettingsCard(){const t=T(),p=PS(),cityOpts=PT_CITIES.map(([n])=>`
   return`<div class="card"><h2>${t.ptTitle}</h2>
     <div class="field"><label for="ptCity">${t.ptCity}</label><select id="ptCity"><option value="">${p.lat!=null&&!p.city?t.myLocation:"—"}</option>${cityOpts}</select></div>
     <div class="row"><button class="btn small" id="ptGeo">📍 ${t.ptUseLoc}</button><span class="muted small" id="ptGeoMsg"></span></div>
-    <div class="field"><label for="ptMethod">${t.ptMethod}</label><select id="ptMethod">${Object.keys(PT_METHODS).map(m=>`<option value="${m}"${p.method===m?" selected":""}>${t.ptMethods[m]}</option>`).join("")}</select></div>
     <div class="muted small">${t.ptHelp}</div>
     <label class="toggle"><input type="checkbox" id="ptNotify" ${p.notify?"checked":""}> <span><b>${t.ptRemind}</b><br><span class="muted">${t.ptRemindHelp}</span></span></label>
     <div class="muted small" id="ptNotifyMsg"></div></div>`}

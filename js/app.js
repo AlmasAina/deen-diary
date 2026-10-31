@@ -478,7 +478,6 @@ view.addEventListener("change",e=>{const t=e.target;
   if(t.dataset.ramtxt){const d=dayOf(sel);d.ramadan=d.ramadan||{};d.ramadan[t.dataset.ramtxt]=t.value.trim().slice(0,80);save();return}
   if(t.id==="ramMode"){S.ramadanMode=t.value;return commit()}
   if(t.id==="ptCity"){const c=PT_CITIES.find(x=>x[0]===t.value);if(c){const p=PS();p.city=c[0];p.lat=c[1];p.lng=c[2]}return commit()}
-  if(t.id==="ptMethod"){PS().method=t.value;return commit()}
   if(t.id==="ptNotify"){const p=PS(),tr=T(),msg=document.getElementById("ptNotifyMsg");
     if(isNative()){p.notify=t.checked;return commit()}
     if(!t.checked){p.notify=false;return commit()}

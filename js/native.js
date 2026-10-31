@@ -16,7 +16,7 @@ async function scheduleLocal(){const ln=LN();if(!ln||!me)return;const t=T(),r=PR
     const now=Date.now(),list=[];let id=1000;
     for(let i=0;i<7;i++){const day=add(new Date(),i),k=key(day);
       const at=h=>{const d=new Date(day);d.setHours(Math.floor(h),Math.round((h%1)*60),0,0);return d};
-      if(p.notify&&p.lat!=null){const tt=prayerTimes(day,p.lat,p.lng,p.method,ASR_SHADOW);
+      if(p.notify&&p.lat!=null){const tt=prayerTimes(day,p.lat,p.lng,autoMethod(p.lat,p.lng),ASR_SHADOW);
         PRAYERS.forEach(([pk,name])=>{const d=at(fixH(tt[pk]));if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.ptNotifBody(name),schedule:{at:d,allowWhileIdle:true}})})}
       if(r.goal){const d=at(r.goalHour);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.ph.goalBody,schedule:{at:d,allowWhileIdle:true}})}
       {const g=G().special;if(r.goal&&g.mulk){const d=at(21);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.sp.mulkRemind,schedule:{at:d,allowWhileIdle:true}})}
