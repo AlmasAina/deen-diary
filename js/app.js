@@ -116,7 +116,7 @@ function checkBadges(){const lines=[["full",T().sFull,streak(fullOK)],["namaz",T
   lines.forEach(([id,label,n])=>MILESTONES.forEach(([m,icon])=>{const b=id+m;if(n>=m&&!S.badges[b]){S.badges[b]=TODAY();got.push({icon,title:`${label}: ${T().ms(m)}`})}}));
   if(got.length){const g=got[got.length-1];popup(`<div class="big">${g.icon}</div><h2>${T().nice}</h2><p>${esc(T().badgeMsg(g.title))}</p><button class="btn primary" data-close>${T().close}</button>`);confetti()}}
 function popup(html,extra=""){const r=document.getElementById("popRoot");r.innerHTML=`<div class="pop" role="dialog"><div class="card ${extra}">${html}</div></div>`}
-document.getElementById("popRoot").addEventListener("click",e=>{const g=e.target.closest("[data-goto]");if(g){tab=g.dataset.goto;azOpen=null}if(e.target.closest("[data-close]")||e.target.classList.contains("pop")){e.currentTarget.innerHTML="";if(justBloomed||g)render()}});
+document.getElementById("popRoot").addEventListener("click",e=>{const g=e.target.closest("[data-goto]");if(g){tab=g.dataset.goto;azOpen=null;gardenAyah=null;setTimeout(()=>scrollTo({top:0,behavior:"smooth"}),30)}if(e.target.closest("[data-close]")||e.target.classList.contains("pop")){e.currentTarget.innerHTML="";if(justBloomed||g)render()}});
 function confetti(cols=["#e2b553","#17604a","#ff8fb1","#6ec3f0","#ffd166"],n=40){for(let i=0;i<n;i++){const c=document.createElement("i");c.className="confetti";
   c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-delay:${Math.random()*.8}s;animation-duration:${2+Math.random()*1.5}s`;document.body.append(c);setTimeout(()=>c.remove(),4500)}}
 let toastT;function toast(msg){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";document.body.append(t)}
@@ -124,10 +124,10 @@ let toastT;function toast(msg){let t=document.querySelector(".toast");if(!t){t=d
 function commit(){save();checkBadges();gardenFeedback();save();render();if(isNative())queueLocalSchedule()}
 function gardenFeedback(){const t=T(),n=streak(fullOK),prev=S.streakSeen??n;S.streakSeen=n;
   if(n===prev)return;
-  if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p>${ayahBox(MOTIVE_HOPE,daySeed())}<button class="btn primary" data-close>${t.close}</button>`);return}
+  if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p>${nextAyah("hope")}<button class="btn primary" data-close>${t.close}</button>`);return}
   const st=lastPic(n,false),before=lastPic(prev,false);
   if(st&&(!before||st[0]>before[0])){popup(`<div class="reveal pop-garden"><img class="pimg" src="garden/${st[2]}.jpg" alt="" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.remove()">${`<div class="rays"></div><div class="fx">${Array.from({length:14},(_,i)=>`<i class="petal" style="left:${(i*37)%100}%;animation-delay:-${(i*1.3).toFixed(1)}s;animation-duration:${7+(i%5)*1.5}s"></i>`).join("")}${Array.from({length:14},(_,i)=>`<i class="mote" style="left:${(i*53)%100}%;top:${(i*29)%80+10}%;animation-delay:-${(i*.7).toFixed(1)}s"></i>`).join("")}</div>`}</div>
-    <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p>${ayahBox(MOTIVE_GROW,st[0])}<button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
+    <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p>${nextAyah("grow")}<button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
   toast(t.hs.flowerToday(n))}
 
 /* ---- flower drawing (origin = flower head centre) ---- */
@@ -419,7 +419,7 @@ function render(){const t=T(),hr=new Date().getHours();
 
 /* ---- events ---- */
 const view=document.getElementById("view");
-document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;azOpen=null;qz.mode="home";render();scrollTo(0,0)}};
+document.getElementById("tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=b.dataset.tab;azOpen=null;gardenAyah=null;qz.mode="home";render();scrollTo(0,0)}};
 document.querySelector(".lang").onclick=e=>{const b=e.target.closest("[data-lang]");if(b){S.lang=b.dataset.lang;save();ls.set("deen-diary-lang",S.lang);render()}};
 {const lg=ls.get("deen-diary-lang");if(!me&&lg)S.lang=lg}
 document.getElementById("logout").onclick=logout;
@@ -435,7 +435,7 @@ view.addEventListener("click",e=>{
       try{localStorage.removeItem(Cloud.key());localStorage.removeItem(Cloud.key()+":dirty")}catch(_){}sb.auth.signOut();Cloud.user=null;me=null;authMode="in";toast(t.deleted);render()});return}const t=e.target.closest("button,a,input[type=checkbox],[data-bud],[data-fl]");if(!t)return;const tr=T();
   if(t.dataset.bud)return openBud(t.dataset.bud);
   if(t.dataset.fl){const f=S.flowers[t.dataset.fl],sp=f&&SPMAP[f.sp];return toast(tr.bloomedOn(sp?(sp.n[S.lang]||sp.n.en):"🌻",parse(t.dataset.fl).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})))}
-  if(t.dataset.goto){e.preventDefault();tab=t.dataset.goto;if(t.dataset.day)sel=t.dataset.day;return render()}
+  if(t.dataset.goto){e.preventDefault();tab=t.dataset.goto;gardenAyah=null;if(t.dataset.day)sel=t.dataset.day;render();scrollTo(0,0);return}
   if(t.dataset.day){sel=t.dataset.day;return render()}
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}

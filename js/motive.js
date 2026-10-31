@@ -5,3 +5,10 @@ const MOTIVE_HOPE=[{"ref": "2:186", "ar": "وَإِذَا سَأَلَكَ عِ�
 function ayahBox(list,seed){const r=list[Math.abs(seed)%list.length],tr={ur:"Fateh Muhammad Jalandhry",roman:"Maulana Maududi",en:"Sahih International"};
   return`<div class="ayahbox"><div class="ar" lang="ar" dir="rtl">${r.ar}</div><div class="tr"${S.lang==="ur"?' dir="rtl"':""}>“${esc(r[S.lang]||r.en)}”</div><div class="muted small">Quran ${r.ref} · ${tr[S.lang]||tr.en}</div></div>`}
 const daySeed=()=>Math.floor(parse(TODAY())/864e5);
+/* rotate through all ayat so a new one appears each time; no repeat until every ayah has been shown */
+function ayahPool(kind){const seen=new Set(),out=[];for(const r of [...(kind==="hope"?MOTIVE_HOPE:MOTIVE_GROW),...MOTIVE_GROW,...MOTIVE_HOPE,...(typeof REMINDERS!=="undefined"?REMINDERS:[])])if(!seen.has(r.ref)){seen.add(r.ref);out.push(r)}return out}
+function nextAyah(kind){const pool=ayahPool(kind),k="ayahTurn";let i=0;try{i=(+localStorage.getItem(k)||0)+1;localStorage.setItem(k,String(i))}catch(e){i=Math.floor(Math.random()*pool.length)}
+  return ayahBox(pool,i)}
+let gardenAyah=null,gardenAyahFor="";
+/* one ayah per visit to the Garden tab: a new one each time the tab is opened, stable while you stay */
+function gardenAyahBox(){if(!gardenAyah){gardenAyah=nextAyah("grow")}return gardenAyah}
