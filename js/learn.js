@@ -25,6 +25,7 @@ function migrateGoals(g){
     if(!g[a]||!g[a].unit){g[a]={on:old.on!==undefined?!!old.on:def.on,unit:a==="taj"&&old.days?"ruku":def.unit,n:a!=="taj"&&old.n?old.n:def.n}}
     if(!g[a].rev)g[a].rev={on:false,days:1}}
   if(!g.seerat)g.seerat={on:false,min:15};
+  if(!g.special)g.special={mulk:true,kahf:true};
   if(!S.qpos){S.qpos={read:S.readPos||{surah:1,ayah:1},tar:S.tarjumaPos||{surah:1,ayah:1},taf:{surah:1,ayah:1},
     taj:S.tajweedPos?{surah:S.tajweedPos.surah,ayah:rukuStart(S.tajweedPos.surah,S.tajweedPos.ruku)}:{surah:1,ayah:1}}}
   for(const[a]of ACTS)if(!S.qpos[a])S.qpos[a]={surah:1,ayah:1};
@@ -68,10 +69,17 @@ function fmtRange(r){return`${SURAH[r.surah-1]} ${r.from}${r.to!==r.from?"–"+r
 function addMinutes(k,kind,id,delta){const d=dayOf(k);
   if(kind==="seerat")d.seerat=Math.max(0,Math.min(600,(d.seerat||0)+delta));
   else{d.lit=d.lit||{};d.lit[id]=Math.max(0,Math.min(600,(d.lit[id]||0)+delta))}}
-function learnGoalsMet(d){if(!d)return 0;let n=0;const g=G();
+/* special surahs: Al-Mulk every night, Al-Kahf on Fridays */
+const isFriday=k=>parse(k).getDay()===5;
+const specialsFor=k=>{const g=G().special;return[g.mulk&&"mulk",g.kahf&&isFriday(k)&&"kahf"].filter(Boolean)};
+function specialCard(k,d,dis){const t=T(),list=specialsFor(k);if(!list.length)return"";const sp=d.special||{};
+  return`<div class="card special"><h2><span>${t.sp.title}<span class="ar">خاص اعمال</span></span><small>${isFriday(k)?t.sp.friday:""}</small></h2>
+    ${list.map(x=>`<div class="check${sp[x]?" done":""}"><input type="checkbox" id="sp_${x}" data-sp="${x}" ${sp[x]?"checked":""}${dis}><label for="sp_${x}"><b>${t.sp[x]}</b> <span class="ar">${x==="mulk"?"سورۃ الملک":"سورۃ الکہف"}</span><br><span class="muted small">${t.sp[x+"Help"]}</span></label></div>`).join("")}</div>`}
+function learnGoalsMet(d,k){if(!d)return 0;let n=0;const g=G();
+  if(k)specialsFor(k).forEach(x=>{if((d.special||{})[x])n++});
   if(g.seerat.on&&(d.seerat||0)>=g.seerat.min)n++;
   S.lit.forEach(x=>{if(((d.lit||{})[x.id]||0)>=x.min)n++});return n}
-function learnGoalsCount(){return(G().seerat.on?1:0)+S.lit.length}
+function learnGoalsCount(k){return(G().seerat.on?1:0)+S.lit.length+(k?specialsFor(k).length:0)}
 
 /* ---- today cards ---- */
 function qCard(act,ar,d,dis){const t=T(),g=G()[act],rec=qRec(d,act),pos=normPos(S.qpos[act]),r=nextRange(act);
@@ -128,6 +136,9 @@ function prefsCard(wizard){const t=T(),g=G();
     <form class="topic add" id="litForm"><input type="text" id="litName" maxlength="60" placeholder="${t.addOwnTopic}" aria-label="${t.addOwnTopic}">
       ${sel('id="litMin" aria-label="'+t.dailyTime+'"',15,MINUTES,o=>t.mins(o))}<button class="btn small primary" id="litAddBtn" disabled>${t.add}</button></form>
     <div class="err" id="litErr" role="alert"></div>
+    <h3 class="subh">${t.sp.title}</h3>
+    <div class="pref flat"><label class="toggle"><input type="checkbox" data-gsp="mulk" ${g.special.mulk?"checked":""}> <b>${t.sp.mulk}</b></label><div class="muted small">${t.sp.mulkHelp}</div>
+      <label class="toggle"><input type="checkbox" data-gsp="kahf" ${g.special.kahf?"checked":""}> <b>${t.sp.kahf}</b></label><div class="muted small">${t.sp.kahfHelp}</div></div>
     <h3 class="subh">${t.dhikr}</h3>
     <div class="pref flat"><label class="toggle"><input type="checkbox" data-goal="dhikr" ${g.dhikr.on?"checked":""}> <b>${t.dhikr}</b></label></div>
     ${wizard?`<div class="row"><button class="btn primary" id="wizDone">${t.wizStart}</button><button class="linkbtn" id="wizSkip">${t.skip}</button></div>`:""}</div>`}
@@ -140,6 +151,7 @@ function learnChange(el){const g=G(),ds=el.dataset;
   if(ds.gcustom){const x=g[ds.gcustom],v=Math.round(+el.value);if(!(v>=1&&v<=LIMITS[x.unit])){el.value=x.n;toast(T().rangeErr(LIMITS[x.unit]));return false}x.n=v;return true}
   if(ds.grev){g[ds.grev].rev.on=el.checked;return true}
   if(ds.grevd){g[ds.grevd].rev.days=+el.value;return true}
+  if(ds.gsp){g.special[ds.gsp]=el.checked;return true}
   if(el.id==="gSeeratOn"){g.seerat.on=el.checked;return true}
   if(el.id==="gSeeratMin"){g.seerat.min=+el.value;return true}
   if(ds.litname){const x=S.lit.find(y=>y.id===ds.litname),v=el.value.trim();if(!x)return false;

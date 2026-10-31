@@ -88,9 +88,9 @@ const tajOK=d=>qDone(d,"taj");
 const fullOK=d=>{const g=G();return namazOK(d)&&ACTS.every(([a])=>!g[a].on||qDone(d,a))};
 function status(k){const d=peek(k);if(d&&d.period)return"period";if(fullOK(d))return"complete";
   if(d&&(prayed(d)||d.tarjuma||d.tajweed))return"partial";return k<TODAY()?"missed":"none"}
-function points(d){if(!d)return 0;let p=0;
+function points(d,k){if(!d)return 0;let p=0;
   PRAYERS.forEach(([x])=>{if(d.prayers[x]==="ontime")p+=10;else if(d.prayers[x]==="qaza")p+=5});
-  p+=Object.values(d.azkar||{}).filter(Boolean).length*10+(d.ramadan&&d.ramadan.fast==="yes"?20:0)+(d.ramadan&&d.ramadan.taraweeh?10:0)+ACTS.filter(([a])=>qDone(d,a)).length*20+Object.keys(d.rev||{}).length*10+learnGoalsMet(d)*10;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
+  p+=Object.values(d.azkar||{}).filter(Boolean).length*10+(d.ramadan&&d.ramadan.fast==="yes"?20:0)+(d.ramadan&&d.ramadan.taraweeh?10:0)+ACTS.filter(([a])=>qDone(d,a)).length*20+Object.keys(d.rev||{}).length*10+learnGoalsMet(d,k)*10;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
 function earliest(){const ks=Object.keys(S.days).sort();return ks[0]||TODAY()}
 /* Streak rules: a day marked "missed" or left incomplete breaks the streak; a day with nothing marked gets
    GRACE days to be filled in before it counts as broken. Period days pause the streak. */
@@ -108,7 +108,7 @@ function streakInfo(pred){const first=earliest();let k=TODAY(),n=0,start=null;co
 function streak(pred){return streakInfo(pred).n}
 const completeDays=()=>Object.keys(S.days).filter(k=>!S.days[k].period&&fullOK(S.days[k])).sort();
 const flowerBonus=()=>Object.entries(S.flowers).reduce((a,[k,f])=>a+(S.days[k]&&fullOK(S.days[k])&&SPMAP[f.sp]?RARITY[SPMAP[f.sp].r].bonus:0),0);
-const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
+const totalPoints=()=>Object.entries(S.days).reduce((a,[k,d])=>a+points(d,k),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
 
 /* ---- quran positions ---- */
 /* ---- rewards ---- */
@@ -182,13 +182,14 @@ function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},not
     ${PRAYERS.map(([p,n,ar])=>`<div class="prayer"><span><i>${ar}</i>${n}</span><div class="seg">${["ontime","qaza","missed"].map(v=>`<button class="${v}${d.prayers[p]===v?" on":""}" data-pray="${p}" data-v="${v}"${dis}>${t[v]}</button>`).join("")}</div></div>`).join("")}</div>
   ${ACTS.filter(([a])=>g[a].on).map(([a,ar])=>qCard(a,ar,d,dis)).join("")}
   ${ACTS.some(([a])=>g[a].on)?"":`<div class="card empty"><b>${t.noQuranGoal}</b><button class="btn primary" data-goto="profile">${t.setGoals}</button></div>`}
-  ${revCard(sel,dis)}`}
+  ${revCard(sel,dis)}
+  ${specialCard(sel,d,dis)}`}
   ${learnCard(d,dis)}
   ${g.dhikr.on?azkarCard(d,dis)+dhikrCard(d,dis):""}
   <div class="card"><h2>${t.routine}<small><a href="#tasks" data-goto="tasks" style="color:var(--green)">${t.edit}</a></small></h2>
     ${S.routine.length?S.routine.map(r=>`<div class="check${d.tasks&&d.tasks[r.id]?" done":""}"><input type="checkbox" id="r_${r.id}" data-rt="${r.id}" ${d.tasks&&d.tasks[r.id]?"checked":""}${dis}><label for="r_${r.id}">${esc(r.name)}</label></div>`).join(""):`<div class="muted">${t.noRoutine}</div>`}</div>
   <div class="card"><h2>${t.note}</h2><textarea id="note" style="min-height:70px;font-family:var(--body);font-size:.9rem" placeholder="${t.notePh}"${dis}>${esc(d.note||"")}</textarea>
-    <div class="muted">${t.dayPts}: <b>${points(peek(sel))}</b></div></div>`}
+    <div class="muted">${t.dayPts}: <b>${points(peek(sel),sel)}</b></div></div>`}
 
 function vCalendar(){const t=T(),y=calMonth.getFullYear(),m=calMonth.getMonth(),first=new Date(y,m,1),n=new Date(y,m+1,0).getDate();
   let cells=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(w=>`<div class="wd">${w}</div>`).join("");
@@ -290,7 +291,7 @@ function vReport(){const t=T(),days=[];for(let i=reportRange-1;i>=0;i--)days.pus
   let pr=0,pp=0,ay=0,tj=0,rt=0,rtT=0,full=0,per=0;
   days.forEach(k=>{const d=peek(k);if(d&&d.period){per++;return}pp+=5;rtT+=S.routine.length;if(!d)return;pr+=prayed(d);
     const tr=qRec(d,"tar");if(tr)ay+=tr.to-tr.from+1;if(qDone(d,"taj"))tj++;if(fullOK(d))full++;rt+=S.routine.filter(r=>d.tasks&&d.tasks[r.id]).length});
-  const pts=days.map(k=>points(peek(k))),max=Math.max(60,...pts),td=peek(TODAY());
+  const pts=days.map(k=>points(peek(k),k)),max=Math.max(60,...pts),td=peek(TODAY());
   const lab={ontime:"✓ "+t.ontime,qaza:"◐ "+t.qaza,missed:"✗ "+t.missed};
   const todayList=td&&td.period?`<div class="excused">${t.period}</div>`:`<div class="tablewrap"><table>
     ${PRAYERS.map(([p,n])=>`<tr><td>${n}</td><td>${lab[td&&td.prayers[p]]||t.pending}</td></tr>`).join("")}
@@ -298,7 +299,7 @@ function vReport(){const t=T(),days=[];for(let i=reportRange-1;i>=0;i--)days.pus
     <tr><td>${t.taj}</td><td>${td&&td.tajweed?`✓ ${SURAH[td.tajweed.surah-1]}, ${t.ruku} ${td.tajweed.ruku}`:t.pending}</td></tr>
     <tr><td>${t.routine}</td><td>${S.routine.filter(r=>td&&td.tasks[r.id]).length}/${S.routine.length}</td></tr></table></div>`;
   const hist=Object.keys(S.days).sort().reverse().slice(0,60).map(k=>{const d=S.days[k];
-    return`<tr><td>${k}</td><td>${d.period?t.periodL:prayed(d)+"/5"}</td><td>${d.tarjuma?`${SURAH[d.tarjuma.surah-1]} ${d.tarjuma.from}–${d.tarjuma.to}`:"–"}</td><td>${d.tajweed?`R${d.tajweed.ruku}`:"–"}</td><td>${points(d)}</td></tr>`}).join("");
+    return`<tr><td>${k}</td><td>${d.period?t.periodL:prayed(d)+"/5"}</td><td>${d.tarjuma?`${SURAH[d.tarjuma.surah-1]} ${d.tarjuma.from}–${d.tarjuma.to}`:"–"}</td><td>${d.tajweed?`R${d.tajweed.ruku}`:"–"}</td><td>${points(d,k)}</td></tr>`}).join("");
   return`<div class="card"><h2>${t.todayRep}<small>${hijri(new Date())}</small></h2>${todayList}</div>
   <div class="card"><h2>${t.progress}<span class="row"><button class="btn small${reportRange===7?" primary":""}" data-range="7">${t.d7}</button><button class="btn small${reportRange===30?" primary":""}" data-range="30">${t.d30}</button></span></h2>
     <div class="stats"><div class="stat"><b>${pp?Math.round(pr/pp*100):0}%</b><span>${t.namazPct} (${pr}/${pp})</span></div><div class="stat"><b>${ay}</b><span>${t.ayat}</span></div>
@@ -407,7 +408,7 @@ function render(){const t=T(),hr=new Date().getHours();
   document.getElementById("totalPts").textContent=totalPoints();document.getElementById("ptsLbl").textContent=t.pts;document.getElementById("ringLbl").textContent=t.ring;
   document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===S.lang));
   document.getElementById("tabs").innerHTML=TABS.map((id,i)=>`<button data-tab="${id}" role="tab" aria-selected="${id===tab}">${t.tabs[i]}</button>`).join("");
-  const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const gl=G(),on=ACTS.filter(([a])=>gl[a].on);const g=prayed(td)+on.filter(([a])=>qDone(td,a)).length+learnGoalsMet(td)+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(5+on.length+learnGoalsCount()+S.routine.length)*100)}
+  const td=peek(TODAY());let pct=0;if(td&&td.period)pct=100;else if(td){const gl=G(),on=ACTS.filter(([a])=>gl[a].on);const g=prayed(td)+on.filter(([a])=>qDone(td,a)).length+learnGoalsMet(td,TODAY())+S.routine.filter(r=>td.tasks[r.id]).length;pct=Math.round(g/(5+on.length+learnGoalsCount(TODAY())+S.routine.length)*100)}
   document.getElementById("ringVal").style.strokeDashoffset=226.2*(1-pct/100);document.getElementById("ringPct").textContent=pct+"%";
   const v=document.getElementById("view"),vk=tab+"|"+(azOpen||"");if(vk!==lastView){lastView=vk;v.style.animation="none";void v.offsetWidth;v.style.animation=""}
   if(!S.onboarded){v.innerHTML=`<div class="card welcome"><div class="authicon">🌿</div><h2 style="justify-content:center">${t.welcomeTitle}</h2><div class="muted" style="text-align:center">${t.welcomeSub}</div></div>`+goalsCard(true);return}
@@ -439,6 +440,7 @@ view.addEventListener("click",e=>{
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}
   if(t.dataset.qdo){toggleQ(sel,t.dataset.qdo);return commit()}
+  if(t.dataset.sp){const d=dayOf(sel);d.special=d.special||{};d.special[t.dataset.sp]=t.checked;return commit()}
   if(adminClick(t))return;
   if(t.dataset.ntread){markRead(t.dataset.ntread);return}
   if(quizClick(t))return commit();

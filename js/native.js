@@ -19,6 +19,8 @@ async function scheduleLocal(){const ln=LN();if(!ln||!me)return;const t=T(),r=PR
       if(p.notify&&p.lat!=null){const tt=prayerTimes(day,p.lat,p.lng,p.method,ASR_SHADOW);
         PRAYERS.forEach(([pk,name])=>{const d=at(fixH(tt[pk]));if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.ptNotifBody(name),schedule:{at:d,allowWhileIdle:true}})})}
       if(r.goal){const d=at(r.goalHour);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.ph.goalBody,schedule:{at:d,allowWhileIdle:true}})}
+      {const g=G().special;if(r.goal&&g.mulk){const d=at(21);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.sp.mulkRemind,schedule:{at:d,allowWhileIdle:true}})}
+       if(r.goal&&g.kahf&&day.getDay()===5){const d=at(9);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.sp.kahfRemind,schedule:{at:d,allowWhileIdle:true}})}}
       if(r.salawat)(SALAWAT_SLOTS[r.salawatPerDay]||SALAWAT_SLOTS[3]).forEach(h=>{const d=at(h);if(d.getTime()>now)list.push({id:id++,title:"Deen Diary",body:t.ph.salawatBody,schedule:{at:d,allowWhileIdle:true}})});
     }
     if(list.length)await ln.schedule({notifications:list.slice(0,60)});

@@ -130,4 +130,6 @@
     prayerNote:"Namaz ke waqt ki yaad dihani upar \"Namaz ke auqaat\" card se on hoti hai.",goalBody:"Aaj ke goals aap ka intezar kar rahe hain. Thoda waqt Quran aur zikr ke liye nikalein.",salawatBody:"Nabi ﷺ par durood bhejein: اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ",
     denied:"Phone ki settings mein Deen Diary ki notifications band hain.",failed:"Yaad dihani schedule nahi ho saki.",scheduled:n=>`Agle 7 din ke liye ${n} yaad dihaniyan schedule ho gayin.`},
   qzScore:"Quiz score",qzHide:"Chhupayein",qzShow:"Dikhayein",qzShowHidden:n=>`Chhupaye hue sawal dikhayein (${n})`,qzByCat:"Qisam ke hisaab se progress",qzOk:n=>`${n} sahi`,
+  sp:{title:"Khaas surtein",friday:"Jumma",mulk:"Aaj raat Surah Al-Mulk",mulkHelp:"Har raat sone se pehle Surah Al-Mulk (67) parhein.",kahf:"Aaj Surah Al-Kahf",kahfHelp:"Jumma ke din Surah Al-Kahf (18) parhein.",
+    mulkRemind:"Sone se pehle Surah Al-Mulk ka waqt 🌙",kahfRemind:"Aaj Jumma hai: Surah Al-Kahf parhna na bhoolein 🕌"},
   bloomedOn:(n,d)=>`${n} · ${d}`};

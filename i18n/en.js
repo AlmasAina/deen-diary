@@ -130,4 +130,6 @@
     prayerNote:"Prayer time reminders are switched on in the Prayer times card above.",goalBody:"Your goals for today are waiting. Take a few minutes for Quran and dhikr.",salawatBody:"Send durood upon the Prophet ﷺ: اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ",
     denied:"Notifications are turned off for Deen Diary in your phone settings.",failed:"Reminders could not be scheduled.",scheduled:n=>`${n} reminders scheduled for the next 7 days.`},
   qzScore:"Quiz score",qzHide:"Hide",qzShow:"Show",qzShowHidden:n=>`Show hidden questions (${n})`,qzByCat:"Progress by category",qzOk:n=>`${n} correct`,
+  sp:{title:"Special surahs",friday:"Jumu'ah",mulk:"Surah Al-Mulk tonight",mulkHelp:"Read Surah Al-Mulk (67) every night before sleeping.",kahf:"Surah Al-Kahf today",kahfHelp:"Read Surah Al-Kahf (18) on Friday.",
+    mulkRemind:"Time for Surah Al-Mulk before you sleep 🌙",kahfRemind:"It's Jumu'ah: remember to read Surah Al-Kahf today 🕌"},
   bloomedOn:(n,d)=>`${n} · ${d}`};
