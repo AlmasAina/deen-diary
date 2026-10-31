@@ -36,11 +36,10 @@ function localNotes(){const t=T(),n=t.nt,d=peek(TODAY())||{},g=G(),out=[];
   if(g.dhikr.on&&!(d.azkar||{}).evening&&new Date().getHours()>=16)out.push(n.goalOpen(t.azSets.evening+" "+t.azkar));
   const dq=typeof dailyQid==="function"&&dailyQid();if(dq&&!QZ().att[dq])out.push(n.quizReady);
   return out}
-function vNotes(){const t=T(),n=t.nt,loc=localNotes();
+function vNotes(){const t=T(),n=t.nt;
   return`<div class="card"><div class="row" style="justify-content:space-between"><button class="btn small" data-goto="today">‹ ${t.back}</button><b>${n.center}</b></div></div>
-  <div class="card"><h2>${n.today}</h2>${loc.length?loc.map(x=>`<div class="lrow"><span>${x}</span></div>`).join(""):`<div class="muted">${n.allClear}</div>`}</div>
-  <div class="card"><h2>${n.history}</h2>${sb?(NLOG.length?NLOG.map(x=>`<div class="lrow note${x.read?"":" unread"}"><div class="lhead"><b>${esc(x.title)}</b><span class="muted small">${x.day}</span></div><div class="muted small">${esc(x.body)}</div>
+  <div class="card"><h2>${n.history}</h2><div class="muted small">${n.emailOnly}</div><button class="linkbtn" data-goto="profile">${n.settings} ›</button>${sb?(NLOG.length?NLOG.map(x=>`<div class="lrow note${x.read?"":" unread"}"><div class="lhead"><b>${esc(x.title)}</b><span class="muted small">${x.day}</span></div><div class="muted small">${esc(x.body)}</div>
       ${x.read?"":`<button class="linkbtn" data-ntread="${x.id}">${n.markRead}</button>`}</div>`).join(""):`<div class="muted">${n.none}</div>`):`<div class="muted">${n.needAccount}</div>`}</div>`}
-function updateBell(){const b=document.getElementById("bell");if(!b)return;const n=me?NLOG.filter(x=>!x.read).length+localNotes().length:0;
+function updateBell(){const b=document.getElementById("bell");if(!b)return;const n=me?NLOG.filter(x=>!x.read).length:0;
   b.hidden=!me;b.querySelector("span").textContent=n?String(n):"";b.setAttribute("aria-label",T().nt.center+(n?` (${n})`:""))}
 async function markRead(id){const x=NLOG.find(y=>String(y.id)===String(id));if(!x)return;x.read=true;try{await sb.from("notification_log").update({read:true}).eq("id",x.id)}catch(e){}updateBell();render()}
