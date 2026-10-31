@@ -414,7 +414,7 @@ function render(){const t=T(),hr=new Date().getHours();
   if(!S.toured)setTimeout(startTour,300);
   schedulePrayerReminder();
   if(tab==="today"&&azOpen&&AZKAR[azOpen]){v.innerHTML=azkarView();return}
-  v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz,admin:vAdmin,notes:vNotes}[tab]();updateBell()}
+  try{v.innerHTML={today:vToday,calendar:()=>vCalendar()+vReport(),garden:vGarden,tasks:vTasks,journal:vJournal,profile:vProfile,quiz:vQuiz,admin:vAdmin,notes:vNotes}[tab]();}catch(err){console.error(err);v.innerHTML=`<div class="card"><b>${t.authErr}</b><div class="muted small">${esc(String(err&&err.message||err))}</div><button class="btn small" data-goto="today">↻</button></div>`}updateBell()}
 
 /* ---- events ---- */
 const view=document.getElementById("view");

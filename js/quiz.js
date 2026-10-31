@@ -54,9 +54,12 @@ function answer(qid,o,ctx){const z=QZ(),q=qById(qid),ok=o===q.ans,prev=z.att[qid
   if(prev&&ctx.retry){prev.retrySel=o;prev.retryOk=ok;prev.retryPts=ok&&!prev.ok&&!prev.retryPts?3:0;prev.retryDate=TODAY();return prev}
   return z.att[qid]={sel:o,ok,date:TODAY(),pts:ok?10:0,cat:q.cat,via:ctx.via||""}}
 function quizPoints(){const z=QZ();let p=0;Object.values(z.att).forEach(a=>p+=(a.pts||0)+(a.retryPts||0));Object.values(z.ch).forEach(c=>p+=(c.done||0)*20);return p}
-function dailyQid(){const z=QZ(),k=TODAY();if(z.daily[k])return z.daily[k];
+function dailyQid(){const z=QZ(),k=TODAY();
+  /* forget saved questions that are no longer in the bank (e.g. the retired Quran-fact questions) */
+  for(const d in z.daily)if(!qById(z.daily[d])&&!z.att[z.daily[d]])delete z.daily[d];
+  if(z.daily[k]&&qById(z.daily[k]))return z.daily[k];
   const last=Object.keys(z.daily).sort().pop();
-  if(last&&!z.att[z.daily[last]])return z.daily[last];
+  if(last&&!z.att[z.daily[last]]&&qById(z.daily[last]))return z.daily[last];
   const pool=quizBank().filter(q=>!z.att[q.id]);if(!pool.length)return null;const r=seedRand("daily"+k)();return z.daily[k]=pool[Math.floor(r*pool.length)].id}
 function nextDailyDate(){const z=QZ(),last=Object.keys(z.daily).sort().pop();return last?plusDays(last,GAP_DAYS):TODAY()}
 
@@ -67,7 +70,7 @@ function optionsHtml(q,att,via){const t=T();
     return`<button class="qopt${cls}" data-qans="${q.id}|${esc(o)}|${via}"${att?" disabled":""}><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</button>`}).join("")}</div>`}
 function feedbackHtml(q,att){const t=T();if(!att)return"";
   return`<div class="qfeed ${att.ok?"ok":"no"}"><b>${att.ok?t.qzRight(att.pts):t.qzWrong(esc(qOpt(q,q.ans)))}</b><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}${q.src==="quran"?" · "+t.qzSrc.quran:q.src==="seerah"?" · "+t.qzSrc.seerah:""}</div></div>`}
-function questionCard(qid,via,head){const q=qById(qid),att=QZ().att[qid];
+function questionCard(qid,via,head){const q=qById(qid),att=QZ().att[qid];if(!q)return"";
   return`<div class="card qcard">${head||""}<div class="qtext">${esc(qText(q))}</div>${optionsHtml(q,att,via)}${feedbackHtml(q,att)}</div>`}
 function dailyCard(){const t=T(),z=QZ(),id=dailyQid(),head=`<h2><span>${t.qzDaily}<span class="ar">سوال</span></span><span class="qscore">${t.qzScore}: <b>${quizPoints()}</b></span></h2><button class="linkbtn qlink" data-goto="quiz">${t.qzJourney} ›</button>`;
   if(!id)return`<div class="card">${head}<div class="muted">${t.qzNextOn(fmtDay(nextDailyDate()))}</div></div>`;
