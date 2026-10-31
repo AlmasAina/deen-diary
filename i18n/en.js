@@ -116,7 +116,7 @@
   nt:{emailOnly:"Your email reminders appear here after they are sent. Choose which reminders you want in Profile → Reminders.",settings:"Reminder settings",push:"Phone notifications from Deen Diary",pushHelp:"Your daily reminder, weekly summary and inactivity note also arrive on this phone.",title:"Reminders",intro:"Optional emails. Choose what you want and when. You can switch them off at any time, and every email has an unsubscribe link.",
     daily:"Daily goal reminder",dailyHelp:"One email at your chosen time, only if some of today's goals are still open.",time:"Send at",cats:{quran:"Quran goals",azkar:"Azkar",habits:"Daily routine",learning:"Seerat & study"},
     weekly:"Weekly progress summary",weeklyHelp:"Prayers, ayat, routine and garden progress for the past 7 days.",day:"Day",days:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
-    inactive:"Gentle note after 24 hours away",inactiveHelp:"Sent once, never repeated, if you haven't used Deen Diary for a day.",quiet:"Quiet hours (no emails)",
+    inactive:"Gentle note after 24 hours away",inactiveHelp:"If you haven't opened Deen Diary for 24 hours, you get a gentle email with an ayah from the Quran, repeated every 24 hours until you return.",quiet:"Quiet hours (no emails)",
     privacy:"Emails never mention period days or private journal entries.",tz:z=>`Times use your time zone (${z}).`,
     center:"Notifications",today:"Today",allClear:"Nothing waiting today. MashaAllah!",history:"Sent reminders",none:"No reminders sent yet.",needAccount:"Sign in with email to receive reminders.",markRead:"Mark as read",
     goalOpen:x=>`${x} is still waiting today.`,quizReady:"Today's question is ready in Knowledge Journey."},

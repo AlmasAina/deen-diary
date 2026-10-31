@@ -1,7 +1,7 @@
 /* Reminder preferences (stored in notification_prefs so the server can read them) and the in-app notification center.
    Loaded before app.js; uses its globals only when called. */
 let NP=null,NLOG=[],npMsg="";
-const NP_DEFAULT=()=>({email_on:false,daily_hour:20,tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"),cats:{quran:true,azkar:true,habits:true,learning:true},weekly:false,weekly_day:5,inactivity:false,quiet_from:22,quiet_to:6,push_on:true});
+const NP_DEFAULT=()=>({email_on:false,daily_hour:20,tz:(Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"),cats:{quran:true,azkar:true,habits:true,learning:true},weekly:false,weekly_day:5,inactivity:true,quiet_from:22,quiet_to:6,push_on:true});
 async function loadNotify(){if(!sb||!me)return;
   try{const{data}=await sb.from("notification_prefs").select("*").eq("user_id",me.id).maybeSingle();NP=Object.assign(NP_DEFAULT(),data||{})}catch(e){NP=NP_DEFAULT()}
   try{const{data}=await sb.from("notification_log").select("id,kind,day,title,body,read,sent_at").order("sent_at",{ascending:false}).limit(60);NLOG=data||[]}catch(e){NLOG=[]}
@@ -43,3 +43,8 @@ function vNotes(){const t=T(),n=t.nt;
 function updateBell(){const b=document.getElementById("bell");if(!b)return;const n=me?NLOG.filter(x=>!x.read).length:0;
   b.hidden=!me;b.querySelector("span").textContent=n?String(n):"";b.setAttribute("aria-label",T().nt.center+(n?` (${n})`:""))}
 async function markRead(id){const x=NLOG.find(y=>String(y.id)===String(id));if(!x)return;x.read=true;try{await sb.from("notification_log").update({read:true}).eq("id",x.id)}catch(e){}updateBell();render()}
+
+/* record that the app was opened, so "we miss you" emails only go out after 24 hours away (at most once an hour) */
+async function pingSeen(){if(!sb||!me)return;try{const k="dd-seen-"+me.id,last=+localStorage.getItem(k)||0;if(Date.now()-last<3600e3)return;
+  await sb.from("notification_prefs").upsert({user_id:me.id,last_seen:new Date().toISOString(),tz:Intl.DateTimeFormat().resolvedOptions().timeZone||"Asia/Karachi"},{onConflict:"user_id"});localStorage.setItem(k,String(Date.now()))}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")pingSeen()});
