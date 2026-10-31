@@ -109,7 +109,7 @@ function confetti(cols=["#e2b553","#17604a","#ff8fb1","#6ec3f0","#ffd166"],n=40)
   c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-delay:${Math.random()*.8}s;animation-duration:${2+Math.random()*1.5}s`;document.body.append(c);setTimeout(()=>c.remove(),4500)}}
 let toastT;function toast(msg){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";document.body.append(t)}
   t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
-function commit(){save();checkBadges();save();render()}
+function commit(){save();checkBadges();save();render();if(isNative())queueLocalSchedule()}
 
 /* ---- flower drawing (origin = flower head centre) ---- */
 function headSVG(sp,s=1){const{shape,c1,c2,np=6}=sp,R=7*s;let p="";
@@ -296,6 +296,7 @@ function vProfile(){const t=T(),fem=(me.gender||S.gender)==="female";return`<div
       <label for="pPw2">${t.confirmPw}</label><input type="password" id="pPw2" autocomplete="new-password" minlength="8" required>
       <div class="err" id="pErr" role="alert"></div><button class="btn">${t.changePw}</button></form></div>`:""}
   ${prayerSettingsCard()}
+  ${phoneCard()}
   ${notifyCard()}
   ${goalsCard()}
   <div class="card"><div class="field"><label for="ramMode">${t.ramadanMode}</label><select id="ramMode">${["auto","on","off"].map(v=>`<option value="${v}"${(S.ramadanMode||"auto")===v?" selected":""}>${t.ramModes[v]}</option>`).join("")}</select></div><div class="muted small">${t.ramModeHelp}</div></div>
@@ -454,12 +455,14 @@ view.addEventListener("change",e=>{const t=e.target;
   if(t.id==="ptMethod"){PS().method=t.value;return commit()}
   if(t.id==="ptAsr"){PS().asr=+t.value;return commit()}
   if(t.id==="ptNotify"){const p=PS(),tr=T(),msg=document.getElementById("ptNotifyMsg");
+    if(isNative()){p.notify=t.checked;return commit()}
     if(!t.checked){p.notify=false;return commit()}
     if(!("Notification"in window)){t.checked=false;msg.textContent=tr.ptNotifNo;return}
     Notification.requestPermission().then(r=>{if(r==="granted"){p.notify=true;commit()}else{t.checked=false;msg.textContent=tr.ptNotifDenied}});return}
   if(t.id==="jFilter"){jFilter=t.value;return render()}
   if(adminChange(t))return;
   if(notifyChange(t))return;
+  if(phoneChange(t))return;
   if(t.id==="qhCat"){qz.filter.cat=t.value;return render()}
   if(t.id==="qhRes"){qz.filter.res=t.value;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}

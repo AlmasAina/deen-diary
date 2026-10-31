@@ -120,4 +120,9 @@
     privacy:"Emails mein kabhi period ke din ya private journal ka zikr nahi hota.",tz:z=>`Waqt aap ke time zone (${z}) ke mutabiq hai.`,
     center:"Notifications",today:"Aaj",allClear:"Aaj kuch baqi nahi. MashaAllah!",history:"Bheji gayi yaad dihaniyan",none:"Abhi koi yaad dihani nahi bheji gayi.",needAccount:"Yaad dihani ke liye email se sign in karein.",markRead:"Parh liya",
     goalOpen:x=>`${x} aaj abhi baqi hai.`,quizReady:"Ilm ke safar mein aaj ka sawal tayyar hai."},
+  ph:{title:"Phone ki yaad dihani",intro:"Yeh isi phone par schedule hoti hain, is liye app band hone par bhi aati hain. Inhein jaari rakhne ke liye hafte mein kam az kam ek dafa app kholein.",
+    webNote:"App band hone par bhi aane wali yaad dihaniyan Deen Diary ki Android app mein milti hain. Website par upar wali namaz ki yaad dihani (jab page khula ho) ya email reminders istemal karein.",
+    goal:"Rozana goals ki yaad dihani",goalHelp:"Har din goals poore karne ki halki si yaad dihani.",salawat:"Durood ki yaad dihani",salawatHelp:"Nabi ﷺ par durood bhejne ki yaad dihani.",perDay:"Kitni dafa",times:n=>n==1?"Din mein ek dafa":`Din mein ${n} dafa`,
+    prayerNote:"Namaz ke waqt ki yaad dihani upar \"Namaz ke auqaat\" card se on hoti hai.",goalBody:"Aaj ke goals aap ka intezar kar rahe hain. Thoda waqt Quran aur zikr ke liye nikalein.",salawatBody:"Nabi ﷺ par durood bhejein: اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ",
+    denied:"Phone ki settings mein Deen Diary ki notifications band hain.",failed:"Yaad dihani schedule nahi ho saki.",scheduled:n=>`Agle 7 din ke liye ${n} yaad dihaniyan schedule ho gayin.`},
   bloomedOn:(n,d)=>`${n} · ${d}`};

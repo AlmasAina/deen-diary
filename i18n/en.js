@@ -120,4 +120,9 @@
     privacy:"Emails never mention period days or private journal entries.",tz:z=>`Times use your time zone (${z}).`,
     center:"Notifications",today:"Today",allClear:"Nothing waiting today. MashaAllah!",history:"Sent reminders",none:"No reminders sent yet.",needAccount:"Sign in with email to receive reminders.",markRead:"Mark as read",
     goalOpen:x=>`${x} is still waiting today.`,quizReady:"Today's question is ready in Knowledge Journey."},
+  ph:{title:"Phone reminders",intro:"Scheduled on this phone, so they arrive even when the app is closed. Open the app at least once a week to keep them going.",
+    webNote:"Phone reminders that arrive when the app is closed are available in the Deen Diary Android app. On the website, use prayer reminders above (while the page is open) or email reminders.",
+    goal:"Daily goal reminder",goalHelp:"A gentle reminder each day to complete your goals.",salawat:"Salawat reminder",salawatHelp:"A reminder to send durood upon the Prophet ﷺ.",perDay:"How often",times:n=>n==1?"Once a day":`${n} times a day`,
+    prayerNote:"Prayer time reminders are switched on in the Prayer times card above.",goalBody:"Your goals for today are waiting. Take a few minutes for Quran and dhikr.",salawatBody:"Send durood upon the Prophet ﷺ: اَللّٰهُمَّ صَلِّ عَلٰى مُحَمَّدٍ",
+    denied:"Notifications are turned off for Deen Diary in your phone settings.",failed:"Reminders could not be scheduled.",scheduled:n=>`${n} reminders scheduled for the next 7 days.`},
   bloomedOn:(n,d)=>`${n} · ${d}`};
