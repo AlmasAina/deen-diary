@@ -87,7 +87,7 @@ function stagesCard(N){const t=T(),nx=nextStage(N),cur=[...STAGES].reverse().fin
   const grace=typeof graceCard==="function"?graceCard():"";
   const td=peek(TODAY()),todayDone=fullOK(td),left=nx?nx[0]-N:0;
   return grace+`<div class="card gdesc">
-    ${cur?`<div class="gnow"><span class="tag c">${t.hs.dayN(cur[0])}</span><h2 style="margin-top:6px">${t.hs.st[cur[1]]}</h2><p class="gtext">${t.hs.desc[cur[1]]}</p></div>`:`<p class="gtext">${t.hs.desc.start}</p>`}
+    ${cur?`<div class="gnow"><span class="tag c">${t.hs.dayN(cur[0])}</span><h2 style="margin-top:6px">${t.hs.st[cur[1]]}</h2><p class="gtext">${t.hs.desc[cur[1]]}</p>${ayahBox(MOTIVE_GROW,daySeed())}</div>`:`<p class="gtext">${t.hs.desc.start}</p>`}
     ${nx?`<div class="secret">
       <div class="lockpic">${nx[2]?`<img src="garden/${nx[2]}.jpg" alt="" aria-hidden="true" onerror="this.remove()">`:""}<span>🔒</span></div>
       <div style="flex:1;min-width:0"><b>${t.hs.secretTitle}</b><div class="muted small">${t.hs.tease[cur?cur[1]:"grass"]}</div>

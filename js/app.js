@@ -124,10 +124,10 @@ let toastT;function toast(msg){let t=document.querySelector(".toast");if(!t){t=d
 function commit(){save();checkBadges();gardenFeedback();save();render();if(isNative())queueLocalSchedule()}
 function gardenFeedback(){const t=T(),n=streak(fullOK),prev=S.streakSeen??n;S.streakSeen=n;
   if(n===prev)return;
-  if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p><button class="btn primary" data-close>${t.close}</button>`);return}
+  if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p>${ayahBox(MOTIVE_HOPE,daySeed())}<button class="btn primary" data-close>${t.close}</button>`);return}
   const st=lastPic(n,false),before=lastPic(prev,false);
   if(st&&(!before||st[0]>before[0])){popup(`<div class="reveal pop-garden"><img class="pimg" src="garden/${st[2]}.jpg" alt="" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.remove()"></div>
-    <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p><button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
+    <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p>${ayahBox(MOTIVE_GROW,st[0])}<button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
   toast(t.hs.flowerToday(n))}
 
 /* ---- flower drawing (origin = flower head centre) ---- */

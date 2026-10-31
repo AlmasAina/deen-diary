@@ -457,3 +457,6 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .reveal-card{max-width:420px!important}.pop-garden{width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;position:relative}
 .pop-garden .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:reveal 3s ease-out both}
 .special{border-color:var(--gold)}.special .ar{font-family:var(--display);color:var(--gold)}
+.ayahbox{background:linear-gradient(135deg,var(--gold-soft),var(--card));border:1px solid var(--gold);border-radius:14px;padding:12px 14px;margin-top:8px;text-align:start}
+.ayahbox .ar{font-family:var(--display);font-size:1.3rem;line-height:2;text-align:right;color:var(--green)}
+.ayahbox .tr{line-height:1.6;margin:4px 0}
