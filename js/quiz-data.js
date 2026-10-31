@@ -171,7 +171,7 @@ const QUIZ_CURATED=[
   o:[["Al-Baqarah 2:282 (the ayah of debt)","البقرہ 2:282 (آیتِ دین)"],["Ayat al-Kursi 2:255","آیت الکرسی 2:255"],["An-Nur 24:35","النور 24:35"],["Al-Baqarah 2:286","البقرہ 2:286"]],
   e:{en:"2:282, about recording debts, is the longest ayah of the Quran.",roman:"2:282, qarz likhne ke baare mein, Quran ki sab se lambi ayat hai.",ur:"2:282، قرض لکھنے کے بارے میں، قرآن کی سب سے لمبی آیت ہے۔"}},
 ];
-const QUIZ_CATS=["research","quran","quranic","seerah","sahabah","ambiya","history"];
+const QUIZ_CATS=["research","quranic","seerah","sahabah","ambiya","history"];
 
 /* "Research" questions: riddle-style clues that send the reader to the seerah to find the answer. */
 QUIZ_CURATED.push(

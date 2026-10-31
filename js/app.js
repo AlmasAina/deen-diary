@@ -96,7 +96,7 @@ function streak(pred){const first=earliest();let k=TODAY(),n=0;const t=peek(k);i
   while(k>=first){const d=peek(k);if(d&&d.period){}else if(pred(d))n++;else break;k=key(add(parse(k),-1))}return n}
 const completeDays=()=>Object.keys(S.days).filter(k=>!S.days[k].period&&fullOK(S.days[k])).sort();
 const flowerBonus=()=>Object.entries(S.flowers).reduce((a,[k,f])=>a+(S.days[k]&&fullOK(S.days[k])&&SPMAP[f.sp]?RARITY[SPMAP[f.sp].r].bonus:0),0);
-const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus()+quizPoints();
+const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
 
 /* ---- quran positions ---- */
 /* ---- rewards ---- */
@@ -465,6 +465,7 @@ view.addEventListener("change",e=>{const t=e.target;
   if(phoneChange(t))return;
   if(t.id==="qhCat"){qz.filter.cat=t.value;return render()}
   if(t.id==="qhRes"){qz.filter.res=t.value;return render()}
+  if(t.id==="qhHidden"){qz.filter.showHidden=t.checked;return render()}
   if(t.id==="jSearch"){jQuery=t.value.trim();return render()}
   if(t.id==="note"){dayOf(sel).note=t.value;save()}});
 view.addEventListener("keydown",e=>{const b=e.target.closest&&e.target.closest("[data-bud]");if(b&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openBud(b.dataset.bud)}});

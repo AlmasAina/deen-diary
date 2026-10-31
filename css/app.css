@@ -422,3 +422,5 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .bell span{position:absolute;top:-4px;inset-inline-end:-4px;min-width:16px;height:16px;border-radius:8px;background:#e8455f;color:#fff;font:700 .62rem/16px var(--body);padding:0 3px}
 .bell span:empty{display:none}
 .note.unread{border-inline-start:3px solid var(--gold);padding-inline-start:8px}
+.qscore{font-size:.8rem;font-weight:500;color:var(--muted)}.qscore b{color:var(--gold)}
+.qlink{align-self:flex-start;padding:0}

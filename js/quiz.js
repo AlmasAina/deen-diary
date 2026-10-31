@@ -24,6 +24,7 @@ function quizBank(){if(_bank)return _bank;const B=[],S_=i=>SURAH[i-1];
     if(rk>=3){const a3=RUKU_STARTS[s-1][2];gen("r3-"+s,"ruku3",[S_(s)],a3,wrongs(a3,nearNums(a3,2,AYAT[s-1],5),"r3"+s),"Tanzil")}}
   Q_SAJDAS.forEach(([c,v],i)=>{const pool=Q_SAJDAS.filter(([c2,v2])=>c2!==c&&v2!==v).map(([c2])=>S_(c2));gen("saj-"+(i+1),"sajda",[v],S_(c),wrongs(S_(c),pool,"sj"+i),"Tanzil")});
   Q_JUZ_START.forEach(([c,v],i)=>{gen("jst-"+(i+1),"juzstart",[i+1],S_(c),wrongs(S_(c),[c-1,c+1,c+2,c-2,c+3].filter(x=>x>=1&&x<=114&&x!==c).map(S_),"js"+i),"Tanzil")});
+  B.length=0; /* generated fact questions (ayah counts etc.) are too simple; keep only reflective ones */
   QUIZ_CURATED.forEach(q=>B.push({id:q.id,cat:q.cat,src:q.src,cur:q,ans:"0",opts:shuffled(["0","1","2","3"],q.id),ref:q.ref}));
   /* admin-managed rows replace built-in questions with the same id; anything not published is left out */
   const dbq=typeof DBQ==="object"&&DBQ?Object.values(DBQ):[];
@@ -38,7 +39,7 @@ function catOf(q){return q.cat}
 
 /* ---- state ---- */
 const QZ=()=>S.quiz||(S.quiz={att:{},ch:{},daily:{}});
-const CH_SIZE=5, GAP_DAYS=2;
+const CH_SIZE=5, GAP_DAYS=1;
 function catQuestions(cat){return shuffled(quizBank().filter(q=>q.cat===cat).map(q=>q.id),"cat-"+cat)}
 function chState(cat){const c=QZ().ch[cat]||(QZ().ch[cat]={level:0});return c}
 function chIds(cat,level){const ids=catQuestions(cat),start=level*CH_SIZE;return ids.slice(start,start+CH_SIZE)}
@@ -54,7 +55,7 @@ function answer(qid,o,ctx){const z=QZ(),q=qById(qid),ok=o===q.ans,prev=z.att[qid
   return z.att[qid]={sel:o,ok,date:TODAY(),pts:ok?10:0,cat:q.cat,via:ctx.via||""}}
 function quizPoints(){const z=QZ();let p=0;Object.values(z.att).forEach(a=>p+=(a.pts||0)+(a.retryPts||0));Object.values(z.ch).forEach(c=>p+=(c.done||0)*20);return p}
 function dailyQid(){const z=QZ(),k=TODAY();if(z.daily[k])return z.daily[k];
-  const last=Object.keys(z.daily).sort().pop();if(last&&last>plusDays(k,-GAP_DAYS)&&z.daily[last]&&z.att[z.daily[last]])return null;
+  const last=Object.keys(z.daily).sort().pop();
   if(last&&!z.att[z.daily[last]])return z.daily[last];
   const pool=quizBank().filter(q=>!z.att[q.id]);if(!pool.length)return null;const r=seedRand("daily"+k)();return z.daily[k]=pool[Math.floor(r*pool.length)].id}
 function nextDailyDate(){const z=QZ(),last=Object.keys(z.daily).sort().pop();return last?plusDays(last,GAP_DAYS):TODAY()}
@@ -68,24 +69,22 @@ function feedbackHtml(q,att){const t=T();if(!att)return"";
   return`<div class="qfeed ${att.ok?"ok":"no"}"><b>${att.ok?t.qzRight(att.pts):t.qzWrong(esc(qOpt(q,q.ans)))}</b><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}${q.src==="quran"?" · "+t.qzSrc.quran:q.src==="seerah"?" · "+t.qzSrc.seerah:""}</div></div>`}
 function questionCard(qid,via,head){const q=qById(qid),att=QZ().att[qid];
   return`<div class="card qcard">${head||""}<div class="qtext">${esc(qText(q))}</div>${optionsHtml(q,att,via)}${feedbackHtml(q,att)}</div>`}
-function dailyCard(){const t=T(),id=dailyQid();if(!id)return`<div class="card"><h2><span>${t.qzDaily}<span class="ar">سوال</span></span><button class="linkbtn" data-goto="quiz">${t.qzJourney} ›</button></h2><div class="muted">${t.qzNextOn(fmtDay(nextDailyDate()))}</div></div>`;
-  return questionCard(id,"daily",`<h2><span>${t.qzDaily}<span class="ar">سوال</span></span><button class="linkbtn" data-goto="quiz">${t.qzJourney} ›</button></h2>`)}
+function dailyCard(){const t=T(),z=QZ(),id=dailyQid(),head=`<h2><span>${t.qzDaily}<span class="ar">سوال</span></span><span class="qscore">${t.qzScore}: <b>${quizPoints()}</b></span></h2><button class="linkbtn qlink" data-goto="quiz">${t.qzJourney} ›</button>`;
+  if(!id)return`<div class="card">${head}<div class="muted">${t.qzNextOn(fmtDay(nextDailyDate()))}</div></div>`;
+  const att=z.att[id];z.hide=z.hide||{};
+  if(att&&z.hide[TODAY()])return`<div class="card qmini">${head}<div class="row" style="justify-content:space-between"><span class="muted">${att.ok?"✓ "+t.qzCorrect:"✗ "+t.qzIncorrect} · ${t.qzNextOn(fmtDay(nextDailyDate()))}</span><button class="linkbtn" data-qzshow="1">${t.qzShow}</button></div></div>`;
+  return questionCard(id,"daily",head)+(att?`<div class="row"><button class="btn small" data-qzhide="1">${t.qzHide}</button></div>`:"")}
 
 function vQuiz(){const t=T(),z=QZ();
   if(qz.mode==="play")return vChallenge();
   if(qz.mode==="history")return vHistory();
   const total=quizBank().length,tried=Object.keys(z.att).length,right=Object.values(z.att).filter(a=>a.ok).length;
   return`<div class="card"><h2><span>${t.qzJourney}<span class="ar">علم کا سفر</span></span><small>${t.qzCount(total)}</small></h2>
-    <div class="garden-stats"><div><b>${tried}</b><span>${t.qzTried}</span></div><div><b>${tried?Math.round(right/tried*100):0}%</b><span>${t.qzCorrectPct}</span></div><div><b>${quizPoints()}</b><span>${t.pts}</span></div></div>
+    <div class="garden-stats"><div><b>${tried}</b><span>${t.qzTried}</span></div><div><b>${tried?Math.round(right/tried*100):0}%</b><span>${t.qzCorrectPct}</span></div><div><b>${quizPoints()}</b><span>${t.qzScore}</span></div></div>
     <div class="muted small">${t.qzHow}</div>
     <button class="btn" data-qzmode="history">📜 ${t.qzMine}</button></div>
-  ${QUIZ_CATS.map(cat=>{const c=chState(cat),lv=levelsIn(cat),fin=c.level>=lv,n=fin?null:chNext(cat),z=QZ();
-    const doneN=fin?CH_SIZE:n.ids.filter(id=>z.att[id]).length;
-    const status=fin?t.qzAllDone:n.i<0?t.qzLevelDone:n.ready?t.qzQReady(n.i+1):t.qzQOpens(n.i+1,fmtDay(n.opens));
-    return`<div class="card qcat"><div class="lhead"><b>${t.qzCats[cat]}</b><span class="muted">${t.qzLevel(Math.min(c.level+1,lv),lv)}</span></div>
-      <div class="pips">${Array.from({length:CH_SIZE},(_,i)=>`<span class="pip${i<doneN?" on":""}"></span>`).join("")}</div>
-      <div class="row" style="justify-content:space-between"><span class="muted small">${status}</span>
-      ${fin?"":`<button class="btn small primary" data-qzplay="${cat}"${n.i>=0&&!n.ready?" disabled":""}>${n.i<0?t.qzSeeResult:t.qzOpen}</button>`}</div></div>`}).join("")}`}
+  <div class="card"><h2>${t.qzByCat}</h2>${QUIZ_CATS.map(cat=>{const all=quizBank().filter(q=>q.cat===cat),done=all.filter(q=>z.att[q.id]),ok=done.filter(q=>z.att[q.id].ok).length;
+    return all.length?`<div class="lrow"><div class="lhead"><b>${t.qzCats[cat]}</b><span class="muted">${done.length}/${all.length} · ${t.qzOk(ok)}</span></div><div class="nextgoal"><i style="width:${done.length/all.length*100}%"></i></div></div>`:""}).join("")}</div>`}
 
 function vChallenge(){const t=T(),c=chState(qz.cat),z=QZ(),n=chNext(qz.cat),ids=n.ids;
   const head=`<div class="row" style="justify-content:space-between"><button class="btn small" data-qzmode="home">‹ ${t.back}</button><span class="muted">${t.qzCats[qz.cat]} · ${t.qzLevel(c.level+1,levelsIn(qz.cat))}</span></div>
@@ -105,10 +104,11 @@ function finishDay(){const c=chState(qz.cat);if(chNext(qz.cat).i<0){c.level++;c.
 const fmtDay=k=>parse(k).toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"short",day:"numeric",month:"short"});
 
 function vHistory(){const t=T(),z=QZ(),f=qz.filter;
-  const rows=Object.entries(z.att).filter(([id,a])=>(f.cat==="all"||a.cat===f.cat)&&(f.res==="all"||(f.res==="ok")===a.ok)).sort((a,b)=>b[1].date.localeCompare(a[1].date));
+  z.hid=z.hid||{};const rows=Object.entries(z.att).filter(([id,a])=>(f.showHidden||!z.hid[id])&&(f.cat==="all"||a.cat===f.cat)&&(f.res==="all"||(f.res==="ok")===a.ok)).sort((a,b)=>b[1].date.localeCompare(a[1].date));
   return`<div class="card"><div class="row" style="justify-content:space-between"><button class="btn small" data-qzmode="home">‹ ${t.back}</button><b>${t.qzMine}</b></div>
     <div class="row"><select id="qhCat" aria-label="${t.qzCategory}"><option value="all">${t.all}</option>${QUIZ_CATS.map(c=>`<option value="${c}"${f.cat===c?" selected":""}>${t.qzCats[c]}</option>`).join("")}</select>
     <select id="qhRes" aria-label="${t.qzResult}"><option value="all">${t.all}</option><option value="ok"${f.res==="ok"?" selected":""}>${t.qzCorrect}</option><option value="no"${f.res==="no"?" selected":""}>${t.qzIncorrect}</option></select></div>
+    <label class="check2"><input type="checkbox" id="qhHidden" ${f.showHidden?"checked":""}> <span>${t.qzShowHidden(Object.keys(z.hid).length)}</span></label>
     <div class="muted small">${t.qzMineHelp}</div></div>
   ${rows.length?rows.map(([id,a])=>{const q=qById(id);if(!q)return"";const retrying=qz.retry===id;
     return`<div class="card qhist ${a.ok?"ok":"no"}"><div class="muted small">${t.qzCats[a.cat]} · ${a.date} · ${t.qzPtsEarned((a.pts||0)+(a.retryPts||0))}</div>
@@ -116,11 +116,14 @@ function vHistory(){const t=T(),z=QZ(),f=qz.filter;
       ${retrying?optionsHtml(q,a.retrySel!==undefined&&a.retryDate===TODAY()&&qz.retryDone?{sel:a.retrySel}:null,"retry"):`<div class="qopts">${q.opts.map((o,i)=>`<div class="qopt static${o===q.ans?" right":o===a.sel?" wrong":""}"><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</div>`).join("")}</div>`}
       ${retrying&&!qz.retryDone?"":`<div class="muted small">${t.qzYour}: <b>${esc(qOpt(q,a.sel))}</b> ${a.ok?"✓":"✗"} · ${t.qzAnswer}: <b>${esc(qOpt(q,q.ans))}</b></div><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}</div>`}
       ${!a.ok&&!a.retryOk&&!retrying?`<button class="btn small" data-qzretry="${id}">${t.qzRetry}</button>`:""}
-      ${a.retryOk?`<div class="muted small">✓ ${t.qzRetried}</div>`:""}</div>`}).join(""):`<div class="card muted">${t.qzNone}</div>`}`}
+      ${a.retryOk?`<div class="muted small">✓ ${t.qzRetried}</div>`:""}<button class="linkbtn" data-qzhid="${id}">${z.hid[id]?t.qzShow:t.qzHide}</button></div>`}).join(""):`<div class="card muted">${t.qzNone}</div>`}`}
 
 /* click handler (from app.js); returns true when handled */
 function quizClick(el){const ds=el.dataset;
   if(ds.qans){const[id,o,via]=ds.qans.split("|");if(via==="retry"){const a=answer(id,o,{retry:true});qz.retry=null;toast(a.retryOk?T().qzRight(a.retryPts||0):T().qzWrong(qOpt(qById(id),qById(id).ans)))}else{answer(id,o,{via});if(via==="ch")qz.show=id}return true}
+  if(ds.qzhide){const z=QZ();z.hide=z.hide||{};z.hide[TODAY()]=true;return true}
+  if(ds.qzshow){const z=QZ();z.hide=z.hide||{};delete z.hide[TODAY()];return true}
+  if(ds.qzhid){const z=QZ();z.hid=z.hid||{};if(z.hid[ds.qzhid])delete z.hid[ds.qzhid];else z.hid[ds.qzhid]=true;return true}
   if(ds.qzmode){qz.mode=ds.qzmode;qz.show=null;qz.retry=null;return true}
   if(ds.qzplay){qz.mode="play";qz.cat=ds.qzplay;qz.show=null;return true}
   if(ds.qznext){qz.show=null;return true}
