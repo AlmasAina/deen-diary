@@ -27,7 +27,7 @@ function quizBank(){if(_bank)return _bank;const B=[],S_=i=>SURAH[i-1];
   B.length=0; /* generated fact questions (ayah counts etc.) are too simple; keep only reflective ones */
   QUIZ_CURATED.forEach(q=>B.push({id:q.id,cat:q.cat,src:q.src,cur:q,ans:"0",opts:shuffled(["0","1","2","3"],q.id),ref:q.ref}));
   /* admin-managed rows replace built-in questions with the same id; anything not published is left out */
-  const dbq=typeof DBQ==="object"&&DBQ?Object.values(DBQ):[];
+  const dbq=typeof DBQ==="object"&&DBQ?Object.values(DBQ).filter(r=>r.cat!=="quran"):[]; /* old generated Quran-fact rows are retired */
   if(dbq.length){const ids=new Set(dbq.map(r=>r.id));const kept=B.filter(q=>!ids.has(q.id));dbq.filter(r=>r.status==="published").forEach(r=>kept.push(rowToQ(r)));_bank=kept;return kept}
   _bank=B;return B}
 const qById=id=>quizBank().find(q=>q.id===id);

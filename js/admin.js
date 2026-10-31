@@ -44,7 +44,7 @@ function admUsers(){const a=A();if(!adm.users&&!adm.busy)admLoad("users");const 
 
 /* every question the app knows: built-in (code) plus database rows */
 function allAdminQs(){const rows=adm.qs||{},out=[],seen=new Set();
-  Object.values(rows).forEach(r=>{seen.add(r.id);out.push({id:r.id,cat:r.cat,status:r.status,text:(r.q&&(r.q.en||r.q.roman||r.q.ur))||"",correct:r.options&&r.options[r.correct]?(r.options[r.correct].en||""):"",db:true,updated:r.updated_at,created:r.created_at,diff:r.difficulty})});
+  Object.values(rows).forEach(r=>{if(r.cat==="quran")return;seen.add(r.id);out.push({id:r.id,cat:r.cat,status:r.status,text:(r.q&&(r.q.en||r.q.roman||r.q.ur))||"",correct:r.options&&r.options[r.correct]?(r.options[r.correct].en||""):"",db:true,updated:r.updated_at,created:r.created_at,diff:r.difficulty})});
   const base=_bank?null:null;const saved=DBQ;DBQ={};_bank=null;const builtin=quizBank();DBQ=saved;_bank=null;
   builtin.forEach(q=>{if(seen.has(q.id))return;const L0=S.lang;S.lang="en";const text=qText(q),corr=qOpt(q,q.ans);S.lang=L0;
     out.push({id:q.id,cat:q.cat,status:"published",text,correct:corr,builtin:true,meta:!q.cur})});
