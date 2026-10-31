@@ -1,6 +1,6 @@
 {
   "appId": "com.deendiary.app",
-  "appName": "Deen Diary",
+  "appName": "Deen Say",
   "webDir": "www",
   "android": { "backgroundColor": "#0f4535" },
   "ios": { "backgroundColor": "#0f4535" },

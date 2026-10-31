@@ -1,15 +1,15 @@
-// Deen Diary reminder emails. Runs hourly (pg_cron) and sends, per user and in their own time zone:
+// Deen Say reminder emails. Runs hourly (pg_cron) and sends, per user and in their own time zone:
 //  - a daily reminder at their chosen hour listing goals still open today,
 //  - an optional weekly summary on their chosen day,
 //  - one gentle note after 24 hours without opening the app.
 // GET ?unsubscribe=<token> turns emails off for that user.
-// Secrets: RESEND_API_KEY, MAIL_FROM (e.g. "Deen Diary <reminders@yourdomain.com>"). SUPABASE_URL and
+// Secrets: RESEND_API_KEY, MAIL_FROM (e.g. "Deen Say <reminders@yourdomain.com>"). SUPABASE_URL and
 // SUPABASE_SERVICE_ROLE_KEY are provided by Supabase. Period data is never read into an email.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const RESEND = Deno.env.get("RESEND_API_KEY") ?? "";
-const FROM = Deno.env.get("MAIL_FROM") ?? "Deen Diary <onboarding@resend.dev>";
+const FROM = Deno.env.get("MAIL_FROM") ?? "Deen Say <onboarding@resend.dev>";
 const SITE = "https://almasaina.github.io/deen-diary/";
 const FN_URL = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-reminders`;
 // Firebase service account JSON (Project settings > Service accounts > Generate new private key), stored as a secret
@@ -25,13 +25,13 @@ const TXT = {
   en: {
     dailyTitle: "Your goals for today are waiting",
     dailyIntro: "A gentle reminder of what is still open today:",
-    weeklyTitle: "Your week in Deen Diary",
+    weeklyTitle: "Your week in Deen Say",
     graceTitle: "Your streak needs you ⏳",
-    graceBody: (d: string) => `Yesterday (${d}) is not complete in Deen Diary yet. You still have time to fill it in and keep your streak and your garden growing.`,
-    inactiveTitle: "We missed you in Deen Diary 🌿",
-    inactiveBody: "You haven't opened Deen Diary for a while. Your garden and your goals are waiting. Take a few quiet minutes today for salah, Quran and the remembrance of Allah; small, steady steps are beloved to Him.",
+    graceBody: (d: string) => `Yesterday (${d}) is not complete in Deen Say yet. You still have time to fill it in and keep your streak and your garden growing.`,
+    inactiveTitle: "We missed you in Deen Say 🌿",
+    inactiveBody: "You haven't opened Deen Say for a while. Your garden and your goals are waiting. Take a few quiet minutes today for salah, Quran and the remembrance of Allah; small, steady steps are beloved to Him.",
     ayahHead: "A reminder from the Quran",
-    open: "Open Deen Diary", unsub: "Turn off these emails",
+    open: "Open Deen Say", unsub: "Turn off these emails",
     items: { quran: "Quran goal", taj: "Tajweed practice", taf: "Tafseer study", tar: "Tarjuma", read: "Quran reading", azkarM: "Morning azkar", azkarE: "Evening azkar", habits: "Daily routine", learning: "Study time" },
     week: (p: number, a: number, h: number, f: number) => `Prayers recorded: ${p}%<br>Ayat translated: ${a}<br>Routine tasks done: ${h}<br>Full days (garden): ${f}`,
     verse: "“Indeed, with hardship comes ease.” — Quran 94:6",
@@ -39,13 +39,13 @@ const TXT = {
   roman: {
     dailyTitle: "Aaj ke goals aap ka intezar kar rahe hain",
     dailyIntro: "Aaj ke yeh kaam abhi baqi hain:",
-    weeklyTitle: "Deen Diary mein aap ka hafta",
+    weeklyTitle: "Deen Say mein aap ka hafta",
     graceTitle: "Aap ki streak khatre mein hai ⏳",
-    graceBody: (d: string) => `Kal (${d}) ka record Deen Diary mein abhi mukammal nahi. Abhi waqt hai, bhar dein taake streak aur garden barhte rahein.`,
-    inactiveTitle: "Deen Diary aap ko yaad kar rahi hai 🌿",
-    inactiveBody: "Aap ne kuch waqt se Deen Diary nahi kholi. Aap ka garden aur goals aap ka intezar kar rahe hain. Aaj thoda sa sukoon ka waqt namaz, Quran aur Allah ki yaad ke liye nikalein; chhote magar musalsal amal Allah ko pasand hain.",
+    graceBody: (d: string) => `Kal (${d}) ka record Deen Say mein abhi mukammal nahi. Abhi waqt hai, bhar dein taake streak aur garden barhte rahein.`,
+    inactiveTitle: "Deen Say aap ko yaad kar rahi hai 🌿",
+    inactiveBody: "Aap ne kuch waqt se Deen Say nahi kholi. Aap ka garden aur goals aap ka intezar kar rahe hain. Aaj thoda sa sukoon ka waqt namaz, Quran aur Allah ki yaad ke liye nikalein; chhote magar musalsal amal Allah ko pasand hain.",
     ayahHead: "Quran se ek yaad dihani",
-    open: "Deen Diary kholein", unsub: "Yeh emails band karein",
+    open: "Deen Say kholein", unsub: "Yeh emails band karein",
     items: { quran: "Quran ka goal", taj: "Tajweed ki mashq", taf: "Tafseer ka mutala", tar: "Tarjuma", read: "Quran tilawat", azkarM: "Subah ke azkar", azkarE: "Shaam ke azkar", habits: "Rozana kaam", learning: "Mutale ka waqt" },
     week: (p: number, a: number, h: number, f: number) => `Namaz: ${p}%<br>Tarjuma ki ayat: ${a}<br>Rozana kaam: ${h}<br>Mukammal din (garden): ${f}`,
     verse: "“Beshak tangi ke saath farakhi bhi hai.” — Quran 94:6",
@@ -53,13 +53,13 @@ const TXT = {
   ur: {
     dailyTitle: "آج کے اہداف آپ کے منتظر ہیں",
     dailyIntro: "آج کے یہ کام ابھی باقی ہیں:",
-    weeklyTitle: "دین ڈائری میں آپ کا ہفتہ",
+    weeklyTitle: "دین سے میں آپ کا ہفتہ",
     graceTitle: "آپ کی اسٹریک خطرے میں ہے ⏳",
-    graceBody: (d: string) => `کل (${d}) کا ریکارڈ دین ڈائری میں ابھی مکمل نہیں۔ ابھی وقت ہے، بھر دیں تاکہ اسٹریک اور باغ بڑھتے رہیں۔`,
-    inactiveTitle: "دین ڈائری آپ کو یاد کر رہی ہے 🌿",
-    inactiveBody: "آپ نے کچھ وقت سے دین ڈائری نہیں کھولی۔ آپ کا باغ اور اہداف آپ کے منتظر ہیں۔ آج تھوڑا سا سکون کا وقت نماز، قرآن اور اللہ کی یاد کے لیے نکالیں؛ چھوٹے مگر مسلسل اعمال اللہ کو پسند ہیں۔",
+    graceBody: (d: string) => `کل (${d}) کا ریکارڈ دین سے میں ابھی مکمل نہیں۔ ابھی وقت ہے، بھر دیں تاکہ اسٹریک اور باغ بڑھتے رہیں۔`,
+    inactiveTitle: "دین سے آپ کو یاد کر رہی ہے 🌿",
+    inactiveBody: "آپ نے کچھ وقت سے دین سے نہیں کھولی۔ آپ کا باغ اور اہداف آپ کے منتظر ہیں۔ آج تھوڑا سا سکون کا وقت نماز، قرآن اور اللہ کی یاد کے لیے نکالیں؛ چھوٹے مگر مسلسل اعمال اللہ کو پسند ہیں۔",
     ayahHead: "قرآن سے ایک یاد دہانی",
-    open: "دین ڈائری کھولیں", unsub: "یہ ای میلز بند کریں",
+    open: "دین سے کھولیں", unsub: "یہ ای میلز بند کریں",
     items: { quran: "قرآن کا ہدف", taj: "تجوید کی مشق", taf: "تفسیر کا مطالعہ", tar: "ترجمہ", read: "تلاوتِ قرآن", azkarM: "صبح کے اذکار", azkarE: "شام کے اذکار", habits: "روزانہ کام", learning: "مطالعے کا وقت" },
     week: (p: number, a: number, h: number, f: number) => `نماز: ${p}%<br>ترجمہ شدہ آیات: ${a}<br>روزانہ کام: ${h}<br>مکمل دن (باغ): ${f}`,
     verse: "“بے شک مشکل کے ساتھ آسانی ہے۔” — قرآن 94:6",
@@ -105,7 +105,7 @@ function ayahBlock(lang: Lang, a: { ref: string; ar: string; ur: string; roman: 
 function page(lang: Lang, title: string, body: string, token: string) {
   const t = TXT[lang], dir = lang === "ur" ? "rtl" : "ltr";
   return `<!doctype html><html dir="${dir}"><body style="margin:0;background:#f1f4ee;font-family:Arial,sans-serif;color:#17271f">
-  <div style="max-width:520px;margin:0 auto;padding:24px 16px"><div style="background:#0f4535;color:#fbf6ea;border-radius:16px 16px 0 0;padding:20px 24px;font-size:22px;font-family:Georgia,serif">Deen Diary</div>
+  <div style="max-width:520px;margin:0 auto;padding:24px 16px"><div style="background:#0f4535;color:#fbf6ea;border-radius:16px 16px 0 0;padding:20px 24px;font-size:22px;font-family:Georgia,serif">Deen Say</div>
   <div style="background:#fff;border-radius:0 0 16px 16px;padding:24px;line-height:1.6"><h2 style="margin:0 0 12px;font-size:18px">${title}</h2>${body}
   <p style="color:#b07d1a;font-style:italic;margin-top:20px">${t.verse}</p>
   <p><a href="${SITE}" style="display:inline-block;background:#17604a;color:#fff;text-decoration:none;padding:10px 18px;border-radius:10px">${t.open}</a></p></div>
@@ -135,7 +135,7 @@ async function pushTo(user_id: string, title: string, body: string) {
   for (const { token } of toks) {
     const r = await fetch(`https://fcm.googleapis.com/v1/projects/${FCM_SA.project_id}/messages:send`, { method: "POST",
       headers: { Authorization: `Bearer ${access}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ message: { token, notification: { title: "Deen Diary", body: `${title}${body ? " — " + body : ""}`.slice(0, 240) } } }) });
+      body: JSON.stringify({ message: { token, notification: { title: "Deen Say", body: `${title}${body ? " — " + body : ""}`.slice(0, 240) } } }) });
     if (r.ok) n++; else if (r.status === 404 || r.status === 400) await db.from("device_tokens").delete().eq("token", token); // app removed or token expired
   }
   return n;
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
   const url = new URL(req.url), tok = url.searchParams.get("unsubscribe"); // GET link in the email or one-click POST from the mail app
   if (tok) {
     await db.from("notification_prefs").update({ email_on: false, weekly: false, inactivity: false, updated_at: new Date().toISOString() }).eq("unsub_token", tok);
-    return new Response("<p style='font-family:sans-serif'>You will no longer receive Deen Diary emails. You can turn them back on in the app under Profile.</p>", { headers: { "Content-Type": "text/html" } });
+    return new Response("<p style='font-family:sans-serif'>You will no longer receive Deen Say emails. You can turn them back on in the app under Profile.</p>", { headers: { "Content-Type": "text/html" } });
   }
   if (req.headers.get("Authorization") !== `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`) return new Response("forbidden", { status: 403 });
 

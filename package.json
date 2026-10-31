@@ -2,7 +2,7 @@
   "name": "deen-diary",
   "version": "1.0.0",
   "private": true,
-  "description": "Deen Diary: Islamic calendar, prayer, Quran and habit tracker",
+  "description": "Deen Say: Islamic calendar, prayer, Quran and habit tracker",
   "scripts": {
     "build:www": "node scripts/build-www.mjs",
     "android": "npm run build:www && npx cap sync android",

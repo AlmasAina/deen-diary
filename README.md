@@ -1,4 +1,4 @@
-# Deen Diary
+# Deen Say
 
 Islamic calendar and daily routine tracker: namaz, 4 ayat tarjuma a day, tajweed (1 ruku × 3 days), period-aware streaks, rewards, a growing garden, tasks, to-do list and progress reports.
 

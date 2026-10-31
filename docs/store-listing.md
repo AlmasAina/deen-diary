@@ -1,7 +1,7 @@
-# Deen Diary: store listing and release checklist
+# Deen Say: store listing and release checklist
 
 ## App details
-- **App name:** Deen Diary
+- **App name:** Deen Say
 - **Package / bundle ID:** com.deendiary.app
 - **Category:** Lifestyle (alternative: Education)
 - **Content rating:** Everyone. No user-to-user chat, no ads, no purchases.
@@ -12,7 +12,7 @@
 Prayer, Quran and dhikr tracker with a garden that grows as you stay consistent.
 
 ## Full description
-Deen Diary is a calm companion for building daily Islamic habits.
+Deen Say is a calm companion for building daily Islamic habits.
 
 • Prayer tracker: mark each of the five prayers as on time or qaza, with prayer times for your city.
 • Quran journey: set your own daily target for reading, tajweed, tafseer and tarjuma, by ayah or by ruku. The app remembers exactly where you stopped.

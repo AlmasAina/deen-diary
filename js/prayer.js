@@ -55,7 +55,7 @@ let ptTimer=null;
 function schedulePrayerReminder(){clearTimeout(ptTimer);if(!me||!PS().notify||!("Notification"in window)||Notification.permission!=="granted")return;
   const nx=nextPrayer();if(!nx)return;const ms=Math.max(1000,nx.inMin*60000);if(ms>6*3600000){ptTimer=setTimeout(schedulePrayerReminder,6*3600000);return}
   ptTimer=setTimeout(()=>{const t=T(),name=PRAYERS.find(x=>x[0]===nx.p)[1];
-    try{const n=new Notification("Deen Diary",{body:t.ptNotifBody(name),icon:"icon.svg",tag:"prayer-"+nx.p+"-"+TODAY()});n.onclick=()=>{window.focus();n.close()}}catch(e){}
+    try{const n=new Notification("Deen Say",{body:t.ptNotifBody(name),icon:"icon.svg",tag:"prayer-"+nx.p+"-"+TODAY()});n.onclick=()=>{window.focus();n.close()}}catch(e){}
     setTimeout(schedulePrayerReminder,60000)},ms)}
 
 /* ---- azkar ---- */
