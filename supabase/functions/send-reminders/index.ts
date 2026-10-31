@@ -25,6 +25,8 @@ const TXT = {
     dailyTitle: "Your goals for today are waiting",
     dailyIntro: "A gentle reminder of what is still open today:",
     weeklyTitle: "Your week in Deen Diary",
+    graceTitle: "Your streak needs you ⏳",
+    graceBody: (d: string) => `Yesterday (${d}) is not complete in Deen Diary yet. You still have time to fill it in and keep your streak and your garden growing.`,
     inactiveTitle: "We missed you in Deen Diary 🌿",
     inactiveBody: "You haven't opened Deen Diary for a while. Your garden and your goals are waiting. Take a few quiet minutes today for salah, Quran and the remembrance of Allah; small, steady steps are beloved to Him.",
     ayahHead: "A reminder from the Quran",
@@ -37,6 +39,8 @@ const TXT = {
     dailyTitle: "Aaj ke goals aap ka intezar kar rahe hain",
     dailyIntro: "Aaj ke yeh kaam abhi baqi hain:",
     weeklyTitle: "Deen Diary mein aap ka hafta",
+    graceTitle: "Aap ki streak khatre mein hai ⏳",
+    graceBody: (d: string) => `Kal (${d}) ka record Deen Diary mein abhi mukammal nahi. Abhi waqt hai, bhar dein taake streak aur garden barhte rahein.`,
     inactiveTitle: "Deen Diary aap ko yaad kar rahi hai 🌿",
     inactiveBody: "Aap ne kuch waqt se Deen Diary nahi kholi. Aap ka garden aur goals aap ka intezar kar rahe hain. Aaj thoda sa sukoon ka waqt namaz, Quran aur Allah ki yaad ke liye nikalein; chhote magar musalsal amal Allah ko pasand hain.",
     ayahHead: "Quran se ek yaad dihani",
@@ -49,6 +53,8 @@ const TXT = {
     dailyTitle: "آج کے اہداف آپ کے منتظر ہیں",
     dailyIntro: "آج کے یہ کام ابھی باقی ہیں:",
     weeklyTitle: "دین ڈائری میں آپ کا ہفتہ",
+    graceTitle: "آپ کی اسٹریک خطرے میں ہے ⏳",
+    graceBody: (d: string) => `کل (${d}) کا ریکارڈ دین ڈائری میں ابھی مکمل نہیں۔ ابھی وقت ہے، بھر دیں تاکہ اسٹریک اور باغ بڑھتے رہیں۔`,
     inactiveTitle: "دین ڈائری آپ کو یاد کر رہی ہے 🌿",
     inactiveBody: "آپ نے کچھ وقت سے دین ڈائری نہیں کھولی۔ آپ کا باغ اور اہداف آپ کے منتظر ہیں۔ آج تھوڑا سا سکون کا وقت نماز، قرآن اور اللہ کی یاد کے لیے نکالیں؛ چھوٹے مگر مسلسل اعمال اللہ کو پسند ہیں۔",
     ayahHead: "قرآن سے ایک یاد دہانی",
@@ -183,6 +189,17 @@ Deno.serve(async (req) => {
       if (p.weekly && now.weekday === p.weekly_day && now.hour === p.daily_hour) {
         const [pr, ay, h, f] = weekStats(data, now.date), body = t.week(pr, ay, h, f);
         sent += await sendOnce(p.user_id, "weekly", now.date, t.weeklyTitle, body.replace(/<br>/g, " · "), user.email, page(lang, t.weeklyTitle, `<p>${body}</p>`, p.unsub_token), { email: true, push }, p.unsub_token);
+      }
+      {
+        const y = addDays(now.date, -1), yd = data?.days?.[y];
+        const missed = !!yd && ["fajr", "zuhr", "asr", "maghrib", "isha"].some((k) => yd.prayers?.[k] === "missed");
+        const g = data?.goals ?? {}, full = !!yd && ["fajr", "zuhr", "asr", "maghrib", "isha"].every((k) => ["ontime", "qaza"].includes(yd.prayers?.[k]))
+          && ["read", "taj", "taf", "tar"].every((a) => !g[a]?.on || yd.q?.[a] || (a === "tar" && yd.tarjuma) || (a === "taj" && yd.tajweed) || (a === "read" && yd.reading));
+        const started = Object.keys(data?.days ?? {}).length > 0;
+        if (started && !yd?.period && !full && !missed && now.hour === p.daily_hour) {
+          sent += await sendOnce(p.user_id, "grace", y, t.graceTitle, t.graceBody(y), user.email,
+            page(lang, t.graceTitle, `<p>${t.graceBody(y)}</p>`, p.unsub_token), { email: p.inactivity !== false, push }, p.unsub_token);
+        }
       }
       const seen = [row?.updated_at, p.last_seen].filter(Boolean).map((x: string) => new Date(x).getTime());
       const lastActive = seen.length ? Math.max(...seen) : 0;

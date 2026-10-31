@@ -92,8 +92,20 @@ function points(d){if(!d)return 0;let p=0;
   PRAYERS.forEach(([x])=>{if(d.prayers[x]==="ontime")p+=10;else if(d.prayers[x]==="qaza")p+=5});
   p+=Object.values(d.azkar||{}).filter(Boolean).length*10+(d.ramadan&&d.ramadan.fast==="yes"?20:0)+(d.ramadan&&d.ramadan.taraweeh?10:0)+ACTS.filter(([a])=>qDone(d,a)).length*20+Object.keys(d.rev||{}).length*10+learnGoalsMet(d)*10;p+=DHIKR.filter(x=>((d.dhikr||{})[x.id]||0)>=x.n).length*5;p+=Object.values(d.tasks||{}).filter(Boolean).length*5;if(fullOK(d))p+=15;return p}
 function earliest(){const ks=Object.keys(S.days).sort();return ks[0]||TODAY()}
-function streak(pred){const first=earliest();let k=TODAY(),n=0;const t=peek(k);if(!(t&&t.period)&&!pred(t))k=key(add(parse(k),-1));
-  while(k>=first){const d=peek(k);if(d&&d.period){}else if(pred(d))n++;else break;k=key(add(parse(k),-1))}return n}
+/* Streak rules: a day marked "missed" or left incomplete breaks the streak; a day with nothing marked gets
+   GRACE days to be filled in before it counts as broken. Period days pause the streak. */
+const GRACE=2;
+const explicitMiss=d=>!!d&&PRAYERS.some(([p])=>d.prayers&&d.prayers[p]==="missed");
+const dayAge=k=>Math.round((parse(TODAY())-parse(k))/864e5);
+function streakInfo(pred){const first=earliest();let k=TODAY(),n=0,start=null;const pending=[];
+  while(k>=first){const d=peek(k),age=dayAge(k);
+    if(d&&d.period){}
+    else if(pred(d)){n++;start=k}
+    else if(age<=GRACE&&!explicitMiss(d)){if(age>0)pending.push(k)}  /* today, or an unfinished day still inside the grace period */
+    else break;
+    k=key(add(parse(k),-1))}
+  return{n,start,pending}}
+function streak(pred){return streakInfo(pred).n}
 const completeDays=()=>Object.keys(S.days).filter(k=>!S.days[k].period&&fullOK(S.days[k])).sort();
 const flowerBonus=()=>Object.entries(S.flowers).reduce((a,[k,f])=>a+(S.days[k]&&fullOK(S.days[k])&&SPMAP[f.sp]?RARITY[SPMAP[f.sp].r].bonus:0),0);
 const totalPoints=()=>Object.values(S.days).reduce((a,d)=>a+points(d),0)+S.todos.filter(t=>t.done).length*5+flowerBonus();
@@ -104,12 +116,19 @@ function checkBadges(){const lines=[["full",T().sFull,streak(fullOK)],["namaz",T
   lines.forEach(([id,label,n])=>MILESTONES.forEach(([m,icon])=>{const b=id+m;if(n>=m&&!S.badges[b]){S.badges[b]=TODAY();got.push({icon,title:`${label}: ${T().ms(m)}`})}}));
   if(got.length){const g=got[got.length-1];popup(`<div class="big">${g.icon}</div><h2>${T().nice}</h2><p>${esc(T().badgeMsg(g.title))}</p><button class="btn primary" data-close>${T().close}</button>`);confetti()}}
 function popup(html,extra=""){const r=document.getElementById("popRoot");r.innerHTML=`<div class="pop" role="dialog"><div class="card ${extra}">${html}</div></div>`}
-document.getElementById("popRoot").addEventListener("click",e=>{if(e.target.closest("[data-close]")||e.target.classList.contains("pop")){e.currentTarget.innerHTML="";if(justBloomed)render()}});
+document.getElementById("popRoot").addEventListener("click",e=>{const g=e.target.closest("[data-goto]");if(g){tab=g.dataset.goto;azOpen=null}if(e.target.closest("[data-close]")||e.target.classList.contains("pop")){e.currentTarget.innerHTML="";if(justBloomed||g)render()}});
 function confetti(cols=["#e2b553","#17604a","#ff8fb1","#6ec3f0","#ffd166"],n=40){for(let i=0;i<n;i++){const c=document.createElement("i");c.className="confetti";
   c.style.cssText=`left:${Math.random()*100}vw;background:${cols[i%cols.length]};animation-delay:${Math.random()*.8}s;animation-duration:${2+Math.random()*1.5}s`;document.body.append(c);setTimeout(()=>c.remove(),4500)}}
 let toastT;function toast(msg){let t=document.querySelector(".toast");if(!t){t=document.createElement("div");t.className="toast";document.body.append(t)}
   t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
-function commit(){save();checkBadges();save();render();if(isNative())queueLocalSchedule()}
+function commit(){save();checkBadges();gardenFeedback();save();render();if(isNative())queueLocalSchedule()}
+function gardenFeedback(){const t=T(),n=streak(fullOK),prev=S.streakSeen??n;S.streakSeen=n;
+  if(n===prev)return;
+  if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p><button class="btn primary" data-close>${t.close}</button>`);return}
+  const st=lastPic(n,false),before=lastPic(prev,false);
+  if(st&&(!before||st[0]>before[0])){popup(`<div class="reveal pop-garden"><img class="pimg" src="garden/${st[2]}.jpg" alt="" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.remove()"></div>
+    <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p><button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
+  toast(t.hs.flowerToday(n))}
 
 /* ---- flower drawing (origin = flower head centre) ---- */
 function headSVG(sp,s=1){const{shape,c1,c2,np=6}=sp,R=7*s;let p="";
@@ -144,11 +163,15 @@ function dhikrCard(d,dis){const t=T(),c=d.dhikr||{};
     ${DHIKR.map(x=>{const v=c[x.id]||0,done=v>=x.n;return`<div class="dz${done?" done":""}"><button class="dzbtn" data-dz="${x.id}"${dis} aria-label="${x.ar} +1">
       <span class="ar" lang="ar">${x.ar}</span><b>${v}<small>/${x.n}</small></b><i style="width:${Math.min(100,v/x.n*100)}%"></i></button>
       <button class="x" data-dzminus="${x.id}"${dis} aria-label="−1">−</button></div>`}).join("")}</div></div>`}
+function graceCard(){const t=T(),si=streakInfo(fullOK);if(!si.pending.length)return"";const k=si.pending[si.pending.length-1];
+  const deadline=add(parse(k),GRACE+1),hrs=Math.max(1,Math.round((deadline-new Date())/36e5));
+  return`<div class="card grace"><b>⏳ ${t.hs.graceTitle}</b><div class="muted">${t.hs.graceText(parse(k).toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"long",day:"numeric",month:"short"}),hrs)}</div>
+    <button class="btn small primary" data-day="${k}" data-goto="today">${t.hs.fillNow}</button></div>`}
 function vToday(){const t=T(),d=peek(sel)||{prayers:{},period:false,tasks:{},note:""},can=editable(sel),dd=parse(sel),dis=can?"":" disabled";
   let chips="";for(let i=BACKFILL;i>=0;i--){const k=key(add(new Date(),-i)),x=parse(k);
     chips+=`<button class="day" data-day="${k}" aria-pressed="${k===sel}">${i===0?t.today:i===1?t.yday:x.toLocaleDateString(S.lang==="ur"?"ur-PK":"en-GB",{weekday:"short"})}<b>${x.getDate()}</b><span class="dot ${status(k)}"></span></button>`}
   const g=G();
-  return`${sel===TODAY()?reminderCard()+timesCard()+dailyCard():""}${streakRow()}
+  return`${sel===TODAY()?graceCard()+reminderCard()+timesCard()+dailyCard():""}${streakRow()}
   <div class="card"><div class="days">${chips}</div>
     <div class="datehead"><b>${gFmt.format(dd)}</b><div class="hijri">${hijri(dd)}</div></div>
     <div class="muted">${can?t.backfill(BACKFILL):t.locked(BACKFILL)}</div></div>
@@ -184,7 +207,8 @@ function vPeriods(){const t=T(),ks=Object.keys(S.days).filter(k=>S.days[k].perio
     return`<tr><td>${r.start}</td><td>${r.end}</td><td>${len} ${t.days}</td><td>${prev?Math.round((parse(r.start)-parse(prev.start))/864e5)+" "+t.days:"–"}</td></tr>`}).join("");
   return`<div class="card"><h2>${t.plog}</h2>${runs.length?`<div class="tablewrap"><table><tr><th>${t.start}</th><th>${t.end}</th><th>${t.len}</th><th>${t.cycle}</th></tr>${rows}</table></div>`:`<div class="muted">${t.noPeriod}</div>`}</div>`}
 
-function vGarden(){const t=T(),days=completeDays(),N=days.length,hr=new Date().getHours();
+function vGarden(){const t=T(),si=streakInfo(fullOK),days=si.n?completeDays().filter(k=>k>=si.start):[],N=days.length,hr=new Date().getHours();
+  if((S.picSeen||0)>N){S.picSeen=(lastPic(N,false)||[0])[0];save()}
   const night=hr>=19||hr<5,dusk=hr>=17&&hr<19,dawn=hr>=5&&hr<7;
   const sky=night?["#081530","#1f3260"]:dusk?["#f08a5d","#ffd6a5"]:dawn?["#f7b2c4","#fde6c8"]:["#7cc8f2","#e8f7ff"];
   const todayFull=fullOK(peek(TODAY()));
@@ -410,7 +434,7 @@ view.addEventListener("click",e=>{
       try{localStorage.removeItem(Cloud.key());localStorage.removeItem(Cloud.key()+":dirty")}catch(_){}sb.auth.signOut();Cloud.user=null;me=null;authMode="in";toast(t.deleted);render()});return}const t=e.target.closest("button,a,input[type=checkbox],[data-bud],[data-fl]");if(!t)return;const tr=T();
   if(t.dataset.bud)return openBud(t.dataset.bud);
   if(t.dataset.fl){const f=S.flowers[t.dataset.fl],sp=f&&SPMAP[f.sp];return toast(tr.bloomedOn(sp?(sp.n[S.lang]||sp.n.en):"🌻",parse(t.dataset.fl).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})))}
-  if(t.dataset.goto){e.preventDefault();tab=t.dataset.goto;return render()}
+  if(t.dataset.goto){e.preventDefault();tab=t.dataset.goto;if(t.dataset.day)sel=t.dataset.day;return render()}
   if(t.dataset.day){sel=t.dataset.day;return render()}
   if(t.dataset.cal){sel=t.dataset.cal;tab="today";return render()}
   if(t.dataset.pray){const d=dayOf(sel);d.prayers[t.dataset.pray]=d.prayers[t.dataset.pray]===t.dataset.v?"":t.dataset.v;return commit()}

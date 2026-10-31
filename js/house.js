@@ -84,8 +84,9 @@ function markPicSeen(N){const st=lastPic(N,false);if(st&&st[0]>(S.picSeen||0)){s
 
 /* what was unlocked most recently, the next secret and the countdown */
 function stagesCard(N){const t=T(),nx=nextStage(N),cur=[...STAGES].reverse().find(([d])=>d<=N);
+  const grace=typeof graceCard==="function"?graceCard():"";
   const td=peek(TODAY()),todayDone=fullOK(td),left=nx?nx[0]-N:0;
-  return`<div class="card gdesc">
+  return grace+`<div class="card gdesc">
     ${cur?`<div class="gnow"><span class="tag c">${t.hs.dayN(cur[0])}</span><h2 style="margin-top:6px">${t.hs.st[cur[1]]}</h2><p class="gtext">${t.hs.desc[cur[1]]}</p></div>`:`<p class="gtext">${t.hs.desc.start}</p>`}
     ${nx?`<div class="secret">
       <div class="lockpic">${nx[2]?`<img src="garden/${nx[2]}.jpg" alt="" aria-hidden="true" onerror="this.remove()">`:""}<span>🔒</span></div>

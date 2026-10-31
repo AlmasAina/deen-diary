@@ -453,3 +453,6 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .lockpic span{position:absolute;inset:0;display:grid;place-content:center;font-size:1.6rem;animation:nudge 3s ease-in-out infinite}
 .countdown{margin:4px 0}.countdown b{font-size:1.6rem;color:var(--gold);font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){.pimg.kb,.rays,.petal,.mote{animation:none!important}}
+.grace{border-color:var(--bad);background:linear-gradient(135deg,var(--bad-soft),var(--card))}
+.reveal-card{max-width:420px!important}.pop-garden{width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;position:relative}
+.pop-garden .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:reveal 3s ease-out both}
