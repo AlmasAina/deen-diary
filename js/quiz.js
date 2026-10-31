@@ -69,7 +69,7 @@ function optionsHtml(q,att,via){const t=T();
   return`<div class="qopts">${q.opts.map((o,i)=>{let cls="";if(att){if(o===q.ans)cls=" right";else if(o===att.sel)cls=" wrong"}
     return`<button class="qopt${cls}" data-qans="${q.id}|${esc(o)}|${via}"${att?" disabled":""}><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</button>`}).join("")}</div>`}
 function feedbackHtml(q,att){const t=T();if(!att)return"";
-  return`<div class="qfeed ${att.ok?"ok":"no"}"><b>${att.ok?t.qzRight(att.pts):t.qzWrong(esc(qOpt(q,q.ans)))}</b><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}${q.src==="quran"?" · "+t.qzSrc.quran:q.src==="seerah"?" · "+t.qzSrc.seerah:""}</div></div>`}
+  return`<div class="qfeed ${att.ok?"ok":"no"}"><b>${att.ok?t.qzRight(att.pts):t.qzWrong(esc(qOpt(q,q.ans)))}</b><div>${qExpl(q)}</div>${storyHtml(q.id)}<div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}${q.src==="quran"?" · "+t.qzSrc.quran:q.src==="seerah"?" · "+t.qzSrc.seerah:""}</div></div>`}
 function questionCard(qid,via,head){const q=qById(qid),att=QZ().att[qid];if(!q)return"";
   return`<div class="card qcard">${head||""}<div class="qtext">${esc(qText(q))}</div>${optionsHtml(q,att,via)}${feedbackHtml(q,att)}</div>`}
 function dailyCard(){const t=T(),z=QZ(),id=dailyQid(),head=`<h2><span>${t.qzDaily}<span class="ar">سوال</span></span><span class="qscore">${t.qzScore}: <b>${quizPoints()}</b></span></h2><button class="linkbtn qlink" data-goto="quiz">${t.qzJourney} ›</button>`;
@@ -117,7 +117,7 @@ function vHistory(){const t=T(),z=QZ(),f=qz.filter;
     return`<div class="card qhist ${a.ok?"ok":"no"}"><div class="muted small">${t.qzCats[a.cat]} · ${a.date} · ${t.qzPtsEarned((a.pts||0)+(a.retryPts||0))}</div>
       <div class="qtext">${esc(qText(q))}</div>
       ${retrying?optionsHtml(q,a.retrySel!==undefined&&a.retryDate===TODAY()&&qz.retryDone?{sel:a.retrySel}:null,"retry"):`<div class="qopts">${q.opts.map((o,i)=>`<div class="qopt static${o===q.ans?" right":o===a.sel?" wrong":""}"><span>${"ABCD"[i]}</span>${esc(qOpt(q,o))}</div>`).join("")}</div>`}
-      ${retrying&&!qz.retryDone?"":`<div class="muted small">${t.qzYour}: <b>${esc(qOpt(q,a.sel))}</b> ${a.ok?"✓":"✗"} · ${t.qzAnswer}: <b>${esc(qOpt(q,q.ans))}</b></div><div>${qExpl(q)}</div><div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}</div>`}
+      ${retrying&&!qz.retryDone?"":`<div class="muted small">${t.qzYour}: <b>${esc(qOpt(q,a.sel))}</b> ${a.ok?"✓":"✗"} · ${t.qzAnswer}: <b>${esc(qOpt(q,q.ans))}</b></div><div>${qExpl(q)}</div>${storyHtml(q.id)}<div class="muted small">${t.qzRef}: ${esc(q.src==="meta"?t.qzMetaRef:q.ref)}</div>`}
       ${!a.ok&&!a.retryOk&&!retrying?`<button class="btn small" data-qzretry="${id}">${t.qzRetry}</button>`:""}
       ${a.retryOk?`<div class="muted small">✓ ${t.qzRetried}</div>`:""}<button class="linkbtn" data-qzhid="${id}">${z.hid[id]?t.qzShow:t.qzHide}</button></div>`}).join(""):`<div class="card muted">${t.qzNone}</div>`}`}
 

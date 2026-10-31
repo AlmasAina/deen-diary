@@ -479,3 +479,5 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 @keyframes shimmer{to{background-position:200% center}}
 .pop .card{animation:pop .5s cubic-bezier(.2,.9,.3,1.4)}
 @media (prefers-reduced-motion:reduce){.reveal-card>*{opacity:1!important;animation:none!important}}
+.story{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(212,175,55,.10);border-left:3px solid #d4af37;animation:fadeUp .4s ease}
+.story summary{cursor:pointer;font-weight:600}.story p{line-height:1.7;margin:8px 0}
