@@ -126,7 +126,7 @@ function gardenFeedback(){const t=T(),n=streak(fullOK),prev=S.streakSeen??n;S.st
   if(n===prev)return;
   if(n<prev){if(prev>0)popup(`<div class="big">🍂</div><h2>${t.hs.brokeTitle}</h2><p>${t.hs.brokeText(prev)}</p>${ayahBox(MOTIVE_HOPE,daySeed())}<button class="btn primary" data-close>${t.close}</button>`);return}
   const st=lastPic(n,false),before=lastPic(prev,false);
-  if(st&&(!before||st[0]>before[0])){popup(`<div class="reveal pop-garden"><img class="pimg" src="garden/${st[2]}.jpg" alt="" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.remove()"></div>
+  if(st&&(!before||st[0]>before[0])){popup(`<div class="reveal pop-garden"><img class="pimg" src="garden/${st[2]}.jpg" alt="" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.remove()">${`<div class="rays"></div><div class="fx">${Array.from({length:14},(_,i)=>`<i class="petal" style="left:${(i*37)%100}%;animation-delay:-${(i*1.3).toFixed(1)}s;animation-duration:${7+(i%5)*1.5}s"></i>`).join("")}${Array.from({length:14},(_,i)=>`<i class="mote" style="left:${(i*53)%100}%;top:${(i*29)%80+10}%;animation-delay:-${(i*.7).toFixed(1)}s"></i>`).join("")}</div>`}</div>
     <h2>✨ ${t.hs.st[st[1]]}</h2><p>${t.hs.desc[st[1]]}</p>${ayahBox(MOTIVE_GROW,st[0])}<button class="btn primary" data-close data-goto="garden">${t.hs.seeGarden}</button>`,"reveal-card");confetti(["#e2b553","#fff3b0","#f6c6d8","#ffffff"],70);return}
   toast(t.hs.flowerToday(n))}
 
