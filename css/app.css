@@ -424,3 +424,32 @@ html[dir="rtl"] .qopt{font-family:var(--urdu)}
 .note.unread{border-inline-start:3px solid var(--gold);padding-inline-start:8px}
 .qscore{font-size:.8rem;font-weight:500;color:var(--muted)}.qscore b{color:var(--gold)}
 .qlink{align-self:flex-start;padding:0}
+
+/* ---- picture garden ---- */
+.scene .svgfb{display:none}
+.scene.nopic .pic{display:none}.scene.nopic .svgfb{display:block}
+.pic{position:relative;aspect-ratio:4/3;max-width:100%;overflow:hidden;border-radius:18px;background:#e9e2cf}
+.pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pimg.kb{animation:kenburns 28s ease-in-out infinite alternate;transform-origin:50% 60%}
+@keyframes kenburns{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.12) translate(-1.5%,-1%)}}
+.unlocking .pimg.kb{animation:reveal 3.2s ease-out both,kenburns 28s 3.2s ease-in-out infinite alternate}
+@keyframes reveal{0%{opacity:0;filter:blur(14px) brightness(1.6);transform:scale(1.15)}60%{opacity:1;filter:blur(2px) brightness(1.25)}100%{opacity:1;filter:none;transform:scale(1.02)}}
+.unlocking .pimg.old{animation:fadeOld 3.2s ease-out forwards}
+@keyframes fadeOld{to{opacity:0;filter:blur(8px)}}
+.rays{position:absolute;inset:-20%;background:conic-gradient(from 200deg at 55% -10%,transparent 0 10deg,rgba(255,244,200,.22) 14deg,transparent 22deg,rgba(255,244,200,.16) 30deg,transparent 40deg,rgba(255,244,200,.2) 48deg,transparent 60deg);mix-blend-mode:screen;animation:rays 9s ease-in-out infinite alternate;pointer-events:none}
+@keyframes rays{from{opacity:.55;transform:rotate(-2deg)}to{opacity:1;transform:rotate(2deg)}}
+.fx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.petal{position:absolute;top:-6%;width:10px;height:7px;border-radius:60% 0 60% 0;background:rgba(255,190,210,.9);box-shadow:0 0 4px rgba(255,255,255,.6);animation:petalfall linear infinite}
+.petal:nth-child(3n){background:rgba(255,255,255,.95)}.petal:nth-child(4n){background:rgba(255,220,150,.9)}
+@keyframes petalfall{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(30px,55vh) rotate(200deg)}100%{transform:translate(-10px,110%) rotate(400deg);opacity:.2}}
+.mote{position:absolute;width:4px;height:4px;border-radius:50%;background:#fff6d0;box-shadow:0 0 8px 2px rgba(255,240,180,.8);animation:mote 6s ease-in-out infinite}
+@keyframes mote{0%,100%{opacity:0;transform:translateY(0)}50%{opacity:1;transform:translateY(-14px)}}
+.unlock-badge{position:absolute;left:50%;top:12%;transform:translateX(-50%);background:rgba(15,69,53,.85);color:#fbf6ea;padding:8px 16px;border-radius:999px;font-weight:700;animation:badgein 4s ease both;white-space:nowrap}
+@keyframes badgein{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}15%,80%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0}}
+.gdesc .gtext{margin:4px 0 0;line-height:1.7}
+.secret{display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,var(--gold-soft),var(--card));border:1px dashed var(--gold);border-radius:16px;padding:10px}
+.lockpic{position:relative;flex:0 0 96px;height:72px;border-radius:12px;overflow:hidden;background:var(--green-2)}
+.lockpic img{width:100%;height:100%;object-fit:cover;filter:blur(7px) brightness(.8) saturate(1.2);transform:scale(1.2)}
+.lockpic span{position:absolute;inset:0;display:grid;place-content:center;font-size:1.6rem;animation:nudge 3s ease-in-out infinite}
+.countdown{margin:4px 0}.countdown b{font-size:1.6rem;color:var(--gold);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.pimg.kb,.rays,.petal,.mote{animation:none!important}}

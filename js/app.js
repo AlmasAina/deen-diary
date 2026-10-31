@@ -228,13 +228,13 @@ function vGarden(){const t=T(),days=completeDays(),N=days.length,hr=new Date().g
   const b=[["full",t.sFull],["namaz",t.sNamaz]].map(([id,l])=>MILESTONES.map(([m,icon])=>`<div class="badge${S.badges[id+m]?" got":""}"><b>${icon}</b>${l}<br>${t.ms(m)}</div>`).join("")).join("");
   return`<div class="card"><h2><span>${t.garden}<span class="ar">باغ</span></span><small>${N} ${t.flowers}</small></h2>
     ${has(N,"interior")?`<div class="seg viewtog"><button class="${gView==="garden"?"on ontime":""}" data-gview="garden">🌿 ${t.hs.gardenView}</button><button class="${gView==="house"?"on ontime":""}" data-gview="house">🏡 ${t.hs.houseView}</button></div>`:""}
-    <div class="scene">${gView==="house"&&has(N,"interior")?interiorSVG(N):svg}</div>
+    <div class="scene">${gView==="house"&&has(N,"interior")?picScene(N,true,interiorSVG(N)):picScene(N,false,svg)}</div>
     ${buds.length?`<div class="budbar"><span>${t.budsReady(buds.length)}</span><button class="btn primary small" data-bud="${buds[0]}">${t.openBud}</button></div>`:""}
     ${N?"":`<div class="goal">${t.emptyG}</div>`}
     <div class="garden-stats"><div><b>${N}</b><span>${t.statF}</span></div><div><b>${cur}</b><span>${t.statS}</span></div><div><span class="gift">🎁</span><span style="display:block">${next?t.gift(next[0]-cur):t.giftAll}</span></div></div>
     ${next?`<div class="nextgoal" aria-label="${cur}/${next[0]}"><i style="width:${Math.min(100,cur/next[0]*100)}%"></i></div>`:""}
     <div class="muted">${t.keep}</div></div>
-  ${stagesCard(N)}
+  ${stagesCard(N)}${(markPicSeen(N),"")}
   <div class="card"><h2>${t.album}<small>${Object.keys(owned).length&&t.found(Object.keys(owned).length,SPECIES.length)||t.found(0,SPECIES.length)}</small></h2><div class="album">${album}</div></div>
   ${streakRow()}
   <div class="card"><h2>${t.badges}</h2><div class="badges">${b}</div></div>`}

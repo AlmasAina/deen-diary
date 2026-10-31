@@ -1,6 +1,9 @@
 /* Garden and house progression. Everything unlocks by the number of full days ever completed, so nothing earned is lost.
    Symbolic and motivational only. Loaded before app.js; uses its globals only when called. */
-const STAGES=[[1,"grass"],[3,"flowers"],[7,"beds"],[14,"fountain"],[30,"house"],[45,"details"],[60,"interior"],[90,"bench"],[120,"bedroom"],[180,"orchard"]];
+/* [full days, key, picture file name in garden/ (the day number), "in" = inside the house] */
+const STAGES=[[1,"grass","1"],[3,"flowers","3"],[7,"beds","7"],[14,"fountain","14"],[30,"house","30"],[45,"details","45"],
+  [60,"interior","60","in"],[90,"bench","90"],[120,"bedroom","120","in"],[180,"orchard","180"],[250,"rivers","250"],
+  [365,"courtyard","365"],[500,"palace","500"],[700,"library","700","in"],[1000,"paradise","1000"]];
 let gView="garden";
 const has=(N,k)=>N>=STAGES.find(s=>s[1]===k)[0];
 function nextStage(N){return STAGES.find(([d])=>d>N)||null}
@@ -65,8 +68,30 @@ function interiorSVG(N){const bed=has(N,"bedroom");
   ${bed?`<g transform="translate(20,96)"><rect x="0" y="40" width="46" height="18" rx="3" fill="#f3ead8"/><rect x="0" y="34" width="46" height="8" rx="3" fill="#7a9e86"/><rect x="-2" y="20" width="6" height="40" rx="2" fill="#8a5a2b"/><rect x="4" y="34" width="12" height="7" rx="3" fill="#fff"/></g>`:""}
   </svg>`}
 
-function stagesCard(N){const t=T(),nx=nextStage(N);
-  return`<div class="card"><h2>${t.hs.title}<small>${t.hs.dayN(N)}</small></h2>
-    ${nx?`<div class="goal">${t.hs.next(t.hs.st[nx[1]],nx[0]-N)}</div><div class="nextgoal"><i style="width:${Math.min(100,N/nx[0]*100)}%"></i></div>`:`<div class="goal">${t.hs.allDone}</div>`}
-    <div class="stages">${STAGES.map(([d,k])=>`<div class="stage${N>=d?" got":""}"><b>${N>=d?"✓":d}</b><span>${t.hs.st[k]}</span></div>`).join("")}</div>
+/* ---- picture garden: the latest unlocked picture, gently animated; falls back to the drawn garden if a picture is missing ---- */
+const lastPic=(N,inside)=>[...STAGES].reverse().find(([d,,,w])=>d<=N&&(inside?w==="in":w!=="in"));
+function picScene(N,inside,svgFallback){const st=lastPic(N,inside);if(!st)return svgFallback;
+  const seen=S.picSeen||0,isNew=st[0]>seen&&!inside,prev=isNew?lastPic(Math.min(seen,st[0]-1),false):null;
+  const petals=Array.from({length:12},(_,i)=>`<i class="petal" style="left:${(i*37)%100}%;animation-delay:-${(i*1.7).toFixed(1)}s;animation-duration:${9+(i%5)*2}s"></i>`).join("");
+  const motes=Array.from({length:18},(_,i)=>`<i class="mote" style="left:${(i*53)%100}%;top:${(i*29)%80+10}%;animation-delay:-${(i*.9).toFixed(1)}s"></i>`).join("");
+  return`<div class="pic${isNew?" unlocking":""}">
+    ${prev?`<img class="pimg old" src="garden/${prev[2]}.jpg" alt="" aria-hidden="true">`:""}
+    <img class="pimg kb" src="garden/${st[2]}.jpg" alt="${esc(T().hs.st[st[1]])}" onerror="if(!this.dataset.png){this.dataset.png=1;this.src=this.src.replace(/\\.jpg$/,'.png')}else this.closest('.scene').classList.add('nopic')">
+    <div class="rays"></div><div class="fx">${petals}${motes}</div>
+    ${isNew?`<div class="unlock-badge">✨ ${T().hs.unlocked}</div>`:""}</div>
+  <div class="svgfb">${svgFallback}</div>`}
+function markPicSeen(N){const st=lastPic(N,false);if(st&&st[0]>(S.picSeen||0)){setTimeout(()=>{S.picSeen=st[0];save()},4000)}}
+
+/* what was unlocked most recently, the next secret and the countdown */
+function stagesCard(N){const t=T(),nx=nextStage(N),cur=[...STAGES].reverse().find(([d])=>d<=N);
+  const td=peek(TODAY()),todayDone=fullOK(td),left=nx?nx[0]-N:0;
+  return`<div class="card gdesc">
+    ${cur?`<div class="gnow"><span class="tag c">${t.hs.dayN(cur[0])}</span><h2 style="margin-top:6px">${t.hs.st[cur[1]]}</h2><p class="gtext">${t.hs.desc[cur[1]]}</p></div>`:`<p class="gtext">${t.hs.desc.start}</p>`}
+    ${nx?`<div class="secret">
+      <div class="lockpic">${nx[2]?`<img src="garden/${nx[2]}.jpg" alt="" aria-hidden="true" onerror="this.remove()">`:""}<span>🔒</span></div>
+      <div style="flex:1;min-width:0"><b>${t.hs.secretTitle}</b><div class="muted small">${t.hs.tease[cur?cur[1]:"grass"]}</div>
+        <div class="countdown"><b>${left}</b> <span>${t.hs.daysLeft(left)}</span></div>
+        <div class="nextgoal"><i style="width:${Math.min(100,(N-(cur?cur[0]:0))/((nx[0]-(cur?cur[0]:0))||1)*100)}%"></i></div>
+        <div class="muted small">${todayDone?t.hs.todayDone:t.hs.todayOpen}</div></div></div>`:`<div class="goal">${t.hs.allDone}</div>`}
+    <details><summary class="muted small">${t.hs.allStages}</summary><div class="stages">${STAGES.map(([d,k])=>`<div class="stage${N>=d?" got":""}"><b>${N>=d?"✓":"🔒 "+d}</b><span>${N>=d?t.hs.st[k]:"???"}</span></div>`).join("")}</div></details>
     <div class="muted small">${t.hs.note}</div></div>`}
